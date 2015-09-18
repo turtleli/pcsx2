@@ -1,0 +1,22 @@
+version: 1.3.1-{build}-{branch}
+
+platform: Win32
+
+init:
+  - git config --global core.autocrlf true
+
+build_script:
+  - set PATH=C:\Program Files (x86)\MSBuild\12.0\Bin;%PATH%
+  - msbuild buildbot.xml /m /t:ReleaseAll /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+
+after_build:
+  - set FOLDER_NAME=pcsx2-v%APPVEYOR_BUILD_VERSION%-%APPVEYOR_REPO_COMMIT%
+  - xcopy /s /i /y bin %FOLDER_NAME%
+  - type NUL > %FOLDER_NAME%\portable.ini
+  - 7z a %FOLDER_NAME%.7z %FOLDER_NAME%
+
+test: off
+
+artifacts:
+  - path: $(FOLDER_NAME).7z
+    name: $(FOLDER_NAME)
