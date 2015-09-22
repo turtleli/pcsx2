@@ -6,9 +6,11 @@ build:
   parallel: true
   project: buildbot.xml
 
-configuration:
-  - ReleaseAll
-  - DebugAll
+configuration: ReleaseAll
+
+branch:
+  only:
+    - appveyor
 
 init:
   - ps: Update-AppveyorBuild -Version "v1.3.1-$env:appveyor_build_number-$env:appveyor_repo_branch-g$($env:appveyor_repo_commit.substring(0,7))"
@@ -20,7 +22,7 @@ before_build:
 
 after_build:
   - type NUL > bin\portable.ini
-  - set FOLDER_NAME=pcsx2-%APPVEYOR_BUILD_VERSION%-%PLATFORM%-%CONFIGURATION%
+  - set FOLDER_NAME=pcsx2-%APPVEYOR_BUILD_VERSION%-%PLATFORM%
   - rename bin %FOLDER_NAME%
   - 7z a %FOLDER_NAME%.7z %FOLDER_NAME%
 
