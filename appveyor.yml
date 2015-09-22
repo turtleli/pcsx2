@@ -8,7 +8,7 @@ build:
 
 configuration: ReleaseAll
 
-branch:
+branches:
   only:
     - appveyor
 
