@@ -1,18 +1,27 @@
-version: 1.3.1-{build}-{branch}
+version: 0.0.{build}
 
 platform: Win32
 
+build:
+  parallel: true
+  project: buildbot.xml
+
+configuration:
+  - ReleaseAll
+  - DebugAll
+
 init:
+  - ps: Update-AppveyorBuild -Version "v1.3.1-$env:appveyor_build_number-$env:appveyor_repo_branch-g$($env:appveyor_repo_commit.substring(0,7))"
+  # Use CRLF line endings on Windows.
   - git config --global core.autocrlf true
 
-build_script:
+before_build:
   - set PATH=C:\Program Files (x86)\MSBuild\12.0\Bin;%PATH%
-  - msbuild buildbot.xml /m /t:ReleaseAll /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 
 after_build:
-  - set FOLDER_NAME=pcsx2-v%APPVEYOR_BUILD_VERSION%-%APPVEYOR_REPO_COMMIT%
-  - xcopy /s /i /y bin %FOLDER_NAME%
-  - type NUL > %FOLDER_NAME%\portable.ini
+  - type NUL > bin\portable.ini
+  - set FOLDER_NAME=pcsx2-%APPVEYOR_BUILD_VERSION%-%PLATFORM%-%CONFIGURATION%
+  - rename bin %FOLDER_NAME%
   - 7z a %FOLDER_NAME%.7z %FOLDER_NAME%
 
 test: off
