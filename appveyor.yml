@@ -1,15 +1,6 @@
 version: 0.0.{build}
 
-environment:
-  VisualStudioVersion: 12.0
-
 platform: Win32
-
-build:
-  parallel: true
-  project: buildbot.xml
-
-configuration: ReleaseAll
 
 branches:
   only:
@@ -18,6 +9,9 @@ branches:
 init:
   # Use CRLF line endings on Windows.
   - git config --global core.autocrlf true
+
+build_script:
+  - cov-build --dir cov-int msbuild.exe /m /t:ReleaseAll buildbot.xml /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 
 after_build:
   - ps: $env:gitrev=git describe --tags
