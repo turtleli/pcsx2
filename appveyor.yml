@@ -1,5 +1,8 @@
 version: 0.0.{build}
 
+environment:
+  VisualStudioVersion: 12.0
+
 platform: Win32
 
 build:
@@ -13,18 +16,16 @@ branches:
     - appveyor
 
 init:
-  - ps: Update-AppveyorBuild -Version "v1.3.1-$env:appveyor_build_number-$env:appveyor_repo_branch-g$($env:appveyor_repo_commit.substring(0,7))"
   # Use CRLF line endings on Windows.
   - git config --global core.autocrlf true
 
-before_build:
-  - set PATH=C:\Program Files (x86)\MSBuild\12.0\Bin;%PATH%
-
 after_build:
+  - ps: $env:gitrev=git describe --tags
+  - ps: Update-AppveyorBuild -Version "$env:gitrev-$env:appveyor_repo_branch-$env:appveyor_build_number"
   - type NUL > bin\portable.ini
-  - set FOLDER_NAME=pcsx2-%APPVEYOR_BUILD_VERSION%-%PLATFORM%
+  - set FOLDER_NAME=pcsx2-%version%-%platform%
   - rename bin %FOLDER_NAME%
-  - 7z a %FOLDER_NAME%.7z %FOLDER_NAME%
+  - 7z a -mx9 %FOLDER_NAME%.7z %FOLDER_NAME%
 
 test: off
 
