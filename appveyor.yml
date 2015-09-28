@@ -11,7 +11,7 @@ init:
   - git config --global core.autocrlf true
 
 build_script:
-  - cov-build --dir cov-int msbuild.exe /m /t:ReleaseAll buildbot.xml /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - cov-build --dir cov-int msbuild.exe /m /p:Configuration="Release" PCSX2_suite.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 
 after_build:
   - ps: $env:gitrev=git describe --tags
