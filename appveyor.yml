@@ -1,5 +1,8 @@
 version: 0.0.{build}
 
+environment:
+  VisualStudioVersion: 12.0
+
 platform: Win32
 
 branches:
