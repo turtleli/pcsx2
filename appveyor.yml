@@ -1,9 +1,19 @@
 version: 0.0.{build}
 
 environment:
-  VisualStudioVersion: 12.0
+  matrix:
+  - VisualStudioVersion: 12.0
+  - VisualStudioVersion: 14.0
 
 platform: Win32
+
+build:
+  parallel: true
+  project: buildbot.xml
+
+configuration:
+  - ReleaseAll
+  - DebugAll
 
 branches:
   only:
@@ -13,14 +23,11 @@ init:
   # Use CRLF line endings on Windows.
   - git config --global core.autocrlf true
 
-build_script:
-  - cov-build --dir cov-int msbuild.exe /m /p:Configuration="Release" PCSX2_suite.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-
 after_build:
   - ps: $env:gitrev=git describe --tags
   - ps: Update-AppveyorBuild -Version "$env:gitrev-$env:appveyor_repo_branch-$env:appveyor_build_number"
   - type NUL > bin\portable.ini
-  - set FOLDER_NAME=pcsx2-%version%-%platform%
+  - set FOLDER_NAME=pcsx2-%version%-%platform%-%configuration%
   - rename bin %FOLDER_NAME%
   - 7z a -mx9 %FOLDER_NAME%.7z %FOLDER_NAME%
 
