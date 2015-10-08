@@ -23,9 +23,10 @@ init:
   # Use CRLF line endings on Windows.
   - git config --global core.autocrlf true
 
-after_build:
+install:
   - ps: $env:gitrev=git describe --tags
   - ps: Update-AppveyorBuild -Version "$env:gitrev-$env:appveyor_repo_branch-$env:appveyor_build_number"
+after_build:
   - type NUL > bin\portable.ini
   - set FOLDER_NAME=pcsx2-%version%-%platform%-%configuration%
   - rename bin %FOLDER_NAME%
