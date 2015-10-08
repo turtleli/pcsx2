@@ -24,11 +24,12 @@ init:
   - git config --global core.autocrlf true
 
 install:
-  - ps: $env:gitrev=git describe --tags
-  - ps: Update-AppveyorBuild -Version "$env:gitrev-$env:appveyor_repo_branch-$env:appveyor_build_number"
+  - ps: $env:gitrev = git describe --tags
+  - ps: $env:my_version = "$env:gitrev-$env:appveyor_repo_branch-$env:appveyor_build_number"
+  - ps: Update-AppveyorBuild -Version "$env:my_version"
 after_build:
   - type NUL > bin\portable.ini
-  - set FOLDER_NAME=pcsx2-%version%-%platform%-%configuration%
+  - set FOLDER_NAME=pcsx2-%my_version%-%platform%-%configuration%
   - rename bin %FOLDER_NAME%
   - 7z a -mx9 %FOLDER_NAME%.7z %FOLDER_NAME%
 
