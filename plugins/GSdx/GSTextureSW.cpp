@@ -22,6 +22,7 @@
 #include "stdafx.h"
 #include "GSTextureSW.h"
 #include "GSPng.h"
+#include <stdio.h>
 
 GSTextureSW::GSTextureSW(int type, int width, int height)
 	: m_mapped(0)
@@ -134,7 +135,7 @@ bool GSTextureSW::Save(const string& fn, bool dds)
 	return true;
 
 #else
-	if(FILE* fp = fopen(fn.c_str(), "wb"))
+	if(FILE* fp = fopen((fn + ".bmp").c_str(), "wb"))
 	{
 		BITMAPINFOHEADER bih;
 

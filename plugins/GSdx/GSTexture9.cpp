@@ -184,7 +184,10 @@ bool GSTexture9::Save(const string& fn, bool dds)
 
 	if(surface != NULL)
 	{
-		return SUCCEEDED(D3DXSaveSurfaceToFile(fn.c_str(), dds ? D3DXIFF_DDS : D3DXIFF_BMP, surface, NULL, NULL));
+		if (dds)
+			return SUCCEEDED(D3DXSaveSurfaceToFile((fn + ".dds").c_str(), D3DXIFF_DDS, surface, NULL, NULL));
+		else
+			return SUCCEEDED(D3DXSaveSurfaceToFile((fn + ".bmp").c_str(), D3DXIFF_BMP, surface, NULL, NULL));
 	}
 /*
 	if(CComQIPtr<IDirect3DTexture9> texture = surface)

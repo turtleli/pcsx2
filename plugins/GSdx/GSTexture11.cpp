@@ -146,8 +146,10 @@ bool GSTexture11::Save(const string& fn, bool dds)
 	{
 		res = m_texture;
 	}
-
-	return SUCCEEDED(D3DX11SaveTextureToFile(m_ctx, res, dds ? D3DX11_IFF_DDS : D3DX11_IFF_BMP, fn.c_str()));
+	if (dds)
+		return SUCCEEDED(D3DX11SaveTextureToFile(m_ctx, res, D3DX11_IFF_DDS, (fn + ".dds").c_str()));
+	else
+		return SUCCEEDED(D3DX11SaveTextureToFile(m_ctx, res, D3DX11_IFF_BMP, (fn + ".bmp").c_str()));
 }
 
 GSTexture11::operator ID3D11Texture2D*()

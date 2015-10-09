@@ -368,7 +368,7 @@ GSTexture* GSRendererCS::GetOutput(int i)
 		{
 			if(s_save && s_n >= s_saven)
 			{
-				m_texture[i]->Save(format("c:\\temp1\\_%05d_f%lld_fr%d_%05x_%d.bmp", s_n, m_perfmon.GetFrame(), i, (int)DISPFB.Block(), (int)DISPFB.PSM));
+				m_texture[i]->Save(format("c:\\temp1\\_%05d_f%lld_fr%d_%05x_%d", s_n, m_perfmon.GetFrame(), i, (int)DISPFB.Block(), (int)DISPFB.PSM));
 			}
 
 			s_n++;
@@ -664,8 +664,8 @@ void GSRendererCS::Draw()
 	{
 		std::string s;
 		/*
-		s = format("c:\\temp1\\_%05d_f%lld_fb0_%05x_%d.bmp", s_n, m_perfmon.GetFrame(), 0, 0);
-		m_mem.SaveBMP(s, 0, 16, PSM_PSMCT32, 1024, 1024);
+		s = format("c:\\temp1\\_%05d_f%lld_fb0_%05x_%d", s_n, m_perfmon.GetFrame(), 0, 0);
+		m_mem.SaveImage(s, 0, 16, PSM_PSMCT32, 1024, 1024);
 		Read(m_mem.GetOffset(0, 16, PSM_PSMCT32), GSVector4i(0, 0, 1024, 1024), false);
 		*/
 		//
@@ -673,15 +673,15 @@ void GSRendererCS::Draw()
 		//
 		if(zm != 0xffffffff) Read(context->offset.zb, r, false);
 
-		s = format("c:\\temp1\\_%05d_f%lld_rt1_%05x_%d.bmp", s_n, m_perfmon.GetFrame(), m_context->FRAME.Block(), m_context->FRAME.PSM);
-		m_mem.SaveBMP(s, m_context->FRAME.Block(), m_context->FRAME.FBW, m_context->FRAME.PSM, GetFrameRect().width(), 512);
+		s = format("c:\\temp1\\_%05d_f%lld_rt1_%05x_%d", s_n, m_perfmon.GetFrame(), m_context->FRAME.Block(), m_context->FRAME.PSM);
+		m_mem.SaveImage(s, m_context->FRAME.Block(), m_context->FRAME.FBW, m_context->FRAME.PSM, GetFrameRect().width(), 512);
 
-		s = format("c:\\temp1\\_%05d_f%lld_zt1_%05x_%d.bmp", s_n, m_perfmon.GetFrame(), m_context->ZBUF.Block(), m_context->ZBUF.PSM);
-		m_mem.SaveBMP(s, m_context->ZBUF.Block(), m_context->FRAME.FBW, m_context->ZBUF.PSM, GetFrameRect().width(), 512);
+		s = format("c:\\temp1\\_%05d_f%lld_zt1_%05x_%d", s_n, m_perfmon.GetFrame(), m_context->ZBUF.Block(), m_context->ZBUF.PSM);
+		m_mem.SaveImage(s, m_context->ZBUF.Block(), m_context->FRAME.FBW, m_context->ZBUF.PSM, GetFrameRect().width(), 512);
 
 		/*
-		s = format("c:\\temp1\\_%05d_f%lld_fb1_%05x_%d.bmp", s_n, m_perfmon.GetFrame(), 0, 0);
-		m_mem.SaveBMP(s, 0, 16, PSM_PSMCT32, 1024, 1024);
+		s = format("c:\\temp1\\_%05d_f%lld_fb1_%05x_%d", s_n, m_perfmon.GetFrame(), 0, 0);
+		m_mem.SaveImage(s, 0, 16, PSM_PSMCT32, 1024, 1024);
 		*/
 
 		s_n++;

@@ -218,7 +218,7 @@ bool GPURenderer::MakeSnapshot(const string& path)
 
 	if(GSTexture* t = m_dev->GetCurrent())
 	{
-		return t->Save(format("%s_%s.bmp", path.c_str(), buff));
+		return t->Save(format("%s_%s", path.c_str(), buff));
 	}
 
 	return false;

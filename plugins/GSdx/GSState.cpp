@@ -1414,10 +1414,10 @@ void GSState::FlushWrite()
 /*
 	static int n = 0;
 	string s;
-	s = format("c:\\temp1\\[%04d]_%05x_%d_%d_%d_%d_%d_%d.bmp",
+	s = format("c:\\temp1\\[%04d]_%05x_%d_%d_%d_%d_%d_%d",
 		n++, (int)m_env.BITBLTBUF.DBP, (int)m_env.BITBLTBUF.DBW, (int)m_env.BITBLTBUF.DPSM,
 		r.left, r.top, r.right, r.bottom);
-	m_mem.SaveBMP(s, m_env.BITBLTBUF.DBP, m_env.BITBLTBUF.DBW, m_env.BITBLTBUF.DPSM, r.right, r.bottom);
+	m_mem.SaveImage(s, m_env.BITBLTBUF.DBP, m_env.BITBLTBUF.DBW, m_env.BITBLTBUF.DPSM, r.right, r.bottom);
 */
 }
 
@@ -1541,10 +1541,10 @@ void GSState::Write(const uint8* mem, int len)
 		/*
 		static int n = 0;
 		string s;
-		s = format("c:\\temp1\\[%04d]_%05x_%d_%d_%d_%d_%d_%d.bmp",
+		s = format("c:\\temp1\\[%04d]_%05x_%d_%d_%d_%d_%d_%d",
 			n++, (int)m_env.BITBLTBUF.DBP, (int)m_env.BITBLTBUF.DBW, (int)m_env.BITBLTBUF.DPSM,
 			r.left, r.top, r.right, r.bottom);
-		m_mem.SaveBMP(s, m_env.BITBLTBUF.DBP, m_env.BITBLTBUF.DBW, m_env.BITBLTBUF.DPSM, r.right, r.bottom);
+		m_mem.SaveImage(s, m_env.BITBLTBUF.DBP, m_env.BITBLTBUF.DBW, m_env.BITBLTBUF.DPSM, r.right, r.bottom);
 		*/
 	}
 	else

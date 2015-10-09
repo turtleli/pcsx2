@@ -378,7 +378,7 @@ void GSDeviceSW::DoMerge(GSTexture* sTex[2], GSVector4* sRect, GSTexture* dTex, 
 		}
 	}
 
-	// dTex->Save("c:\\1.bmp");
+	// dTex->Save("c:\\1");
 }
 
 void GSDeviceSW::DoInterlace(GSTexture* sTex, GSTexture* dTex, int shader, bool linear, float yoffset)
