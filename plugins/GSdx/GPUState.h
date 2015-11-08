@@ -103,9 +103,9 @@ protected:
 #ifdef DEBUG
 		dir = 2;
 #endif
-        string path = format("c:\\temp%d\\%04d_%s.bmp", dir, s_n, s.c_str());
+        string path = format("c:\\temp%d\\%04d_%s", dir, s_n, s.c_str());
 
-		m_mem.SaveBMP(path, r, TP, m_env.CLUT.X, m_env.CLUT.Y);
+		m_mem.SaveImage(path, r, TP, m_env.CLUT.X, m_env.CLUT.Y);
 	}
 
 	void Dump(const string& s, int inc = true)

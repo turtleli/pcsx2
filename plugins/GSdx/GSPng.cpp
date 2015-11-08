@@ -29,10 +29,7 @@ namespace GSPng {
     void Save(GSPng::Format fmt, const string& file, char* image, int w, int h, int pitch)
     {
 #ifdef ENABLE_OGL_PNG
-        std::string root = file;
-        root.replace(file.length()-4, 4, "");
-
-        uint8* data = (uint8*)image;
+		uint8* data = (uint8*)image;
 
         switch (fmt) {
             case R8I_PNG:
@@ -43,7 +40,7 @@ namespace GSPng {
                             img[y][x] = png::gray_pixel(data[x]);
                         }
                     }
-                    img.write(root + "_R8.png");
+					img.write(file + "_R8.png");
                 }
                 break;
 
@@ -55,7 +52,7 @@ namespace GSPng {
                             img[y][x] = png::gray_pixel_16(data[2*x]);
                         }
                     }
-                    img.write(root + "_R16.png");
+					img.write(file + "_R16.png");
                 }
                 break;
 
@@ -69,8 +66,8 @@ namespace GSPng {
                             img_lsb[y][x] = png::gray_pixel_16(data[2*x+2]);
                         }
                     }
-                    img_msb.write(root + "_R32I_msb.png");
-                    img_lsb.write(root + "_R32I_lsb.png");
+					img_msb.write(file + "_R32I_msb.png");
+					img_lsb.write(file + "_R32I_lsb.png");
                 }
                 break;
 
@@ -90,8 +87,8 @@ namespace GSPng {
                             img_lsb[y][x] = lsb;
                         }
                     }
-                    img_msb.write(root + "_msb.png");
-                    img_lsb.write(root + "_lsb.png");
+					img_msb.write(file + "_msb.png");
+					img_lsb.write(file + "_lsb.png");
                 }
                 break;
 
@@ -103,7 +100,7 @@ namespace GSPng {
                             img_alpha[y][x] = png::gray_pixel(data[4*x+3]);
                         }
                     }
-                    img_alpha.write(root + "_alpha.png");
+					img_alpha.write(file + "_alpha.png");
                 }
                 break;
 
@@ -115,7 +112,7 @@ namespace GSPng {
                             img_opaque[y][x] = png::rgb_pixel(data[4*x+0], data[4*x+1], data[4*x+2]);
                         }
                     }
-                    img_opaque.write(root + ".png");
+					img_opaque.write(file + ".png");
                 }
                 break;
 
@@ -127,7 +124,7 @@ namespace GSPng {
                             img[y][x] = png::rgba_pixel(data[4*x+0], data[4*x+1], data[4*x+2], data[4*x+3]);
                         }
                     }
-                    img.write(root + "_full.png");
+					img.write(file + "_full.png");
                 }
                 break;
 
@@ -141,8 +138,8 @@ namespace GSPng {
                             img_alpha[y][x]  = png::gray_pixel(data[4*x+3]);
                         }
                     }
-                    img_opaque.write(root + ".png");
-                    img_alpha.write(root + "_alpha.png");
+					img_opaque.write(file + ".png");
+					img_alpha.write(file + "_alpha.png");
                 }
                 break;
 

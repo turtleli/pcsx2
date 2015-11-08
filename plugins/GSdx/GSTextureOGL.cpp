@@ -457,7 +457,7 @@ struct BITMAPINFOHEADER
 void GSTextureOGL::Save(const string& fn, const void* image, uint32 pitch)
 {
 	// Build a BMP file
-	FILE* fp = fopen(fn.c_str(), "wb");
+	FILE* fp = fopen((fn + ".bmp").c_str(), "wb");
 	if (fp == NULL)
 		return;
 
