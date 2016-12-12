@@ -19,6 +19,8 @@
 #include "SafeArray.h"
 #include "wxGuiTools.h"
 
+#include <map>
+
 // --------------------------------------------------------------------------------------
 //  RadioPanelItem
 // --------------------------------------------------------------------------------------
@@ -174,3 +176,76 @@ protected:
     void _setToolTipImmediate(int idx, const wxString &tip);
     void _RealizeDefaultOption();
 };
+
+namespace pxGUI
+{
+template <typename T>
+class RadioPanel : public wxPanel
+{
+public:
+    RadioPanel(wxWindow *parent, const std::map<T, std::pair<wxString, wxString>> &options, const T &default_value)
+        : wxPanel(parent)
+        , m_default_value(default_value)
+    {
+        wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
+        long style = wxRB_GROUP;
+        for (auto &option : options) {
+            auto &key = option.first;
+            auto &label = option.second.first;
+            auto &tooltip = option.second.second;
+
+            auto pair = m_map.emplace(key, new wxRadioButton(this, wxID_ANY, label, wxDefaultPosition, wxDefaultSize, style));
+            if (!pair.second)
+                assert(0);
+
+            sizer->Add(pair.first->second, wxSizerFlags().Expand().Border(wxALL, 1));
+            pxSetToolTip(pair.first->second, tooltip);
+
+            // Only the first item should have wxRB_GROUP set.
+            style = 0;
+        }
+
+        auto it = m_map.find(default_value);
+        if (it == m_map.end())
+            assert(0);
+
+        it->second->SetValue(true);
+
+        SetSizer(sizer);
+    }
+
+    void SetFontWeight(const T &key, wxFontWeight weight)
+    {
+        auto it = m_map.find(key);
+        if (it == m_map.end())
+            return;
+
+        wxFont font = it->second->GetFont();
+        font.SetWeight(weight);
+        it->second->SetFont(font);
+    }
+
+    void SetValue(const T &key)
+    {
+        auto it = m_map.find(key);
+        if (it == m_map.end())
+            return;
+
+        it->second->SetValue(true);
+    }
+
+    T GetValue() const
+    {
+        for (auto &pair : m_map) {
+            if (pair.second->GetValue())
+                return pair.first;
+        }
+        // Really shouldn't reach here
+        return m_default_value;
+    }
+
+private:
+    std::map<T, wxRadioButton *> m_map;
+    const T m_default_value;
+};
+}
