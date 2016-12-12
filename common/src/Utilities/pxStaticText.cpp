@@ -379,3 +379,78 @@ void operator+=(wxSizer *target, pxStaticText &src)
 {
     target->Add(&src, pxExpand);
 }
+
+namespace pxGUI
+{
+StaticText::StaticText(wxWindow *parent, wxWindowID id, const wxString &text, long style, bool wrapped)
+    : wxStaticText(parent, id, text, wxDefaultPosition, wxDefaultSize, style)
+    , m_text(text)
+{
+    if (wrapped)
+        Bind(wxEVT_SIZE, &StaticText::WrappedSizeEventHandler, this);
+    else
+        Bind(wxEVT_SIZE, &StaticText::UnwrappedSizeEventHandler, this);
+
+    // Reduces flickering on Windows (especially on centred text).
+    Bind(wxEVT_ERASE_BACKGROUND, &StaticText::EraseBackgroundHandler, this);
+}
+
+void StaticText::SetText(const wxString &unwrapped_text)
+{
+    m_text = unwrapped_text;
+    m_text_changed = true;
+    PostSizeEvent();
+}
+
+void StaticText::EraseBackgroundHandler(wxEraseEvent &evt)
+{
+}
+
+void StaticText::WrappedSizeEventHandler(wxSizeEvent &evt)
+{
+    evt.Skip();
+
+    pxTextWrapper wrapper;
+    wrapper.Wrap(this, m_text, GetSize().GetWidth());
+    const wxString &wrapped_text = wrapper.GetResult();
+    if (wrapped_text == GetLabel())
+        return;
+
+    SetLabel(wrapped_text);
+
+    // TODO: This probably isn't quite right. What window should the size event
+    // be sent to? Do we let the user manually specify it?
+    // Clipping might occur when the number of lines increase - the parent
+    // window will re-layout at the next size event, but at this point, it will
+    // have already processed its size event, so the clipping will persist until
+    // the user next resizes the window.
+    // Posting a size event to the parent window solves the clipping issue,
+    // unless the parent window happens to be a wxStaticBox, in which case the
+    // size event needs to be posted to its first non-wxStaticBox parent
+    // window (I think - I didn't experiment too deeply).
+    int wrapped_lines = wrapper.GetLineCount();
+    if (m_lines != wrapped_lines || m_text_changed) {
+        auto parent = GetParent();
+        while (wxIsKindOf(parent, wxStaticBox) && parent->GetParent()) {
+            if (parent && !parent->IsBeingDeleted())
+                parent->PostSizeEvent();
+            parent = parent->GetParent();
+        }
+
+        if (parent && !parent->IsBeingDeleted())
+            parent->PostSizeEvent();
+    }
+    m_lines = wrapped_lines;
+    m_text_changed = false;
+}
+
+void StaticText::UnwrappedSizeEventHandler(wxSizeEvent &evt)
+{
+    evt.Skip();
+
+    if (m_text != GetLabel()) {
+        SetLabel(m_text);
+        PostSizeEventToParent();
+    }
+}
+}

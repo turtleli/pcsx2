@@ -122,3 +122,23 @@ inline void operator+=(wxSizer &target, const pxWindowAndFlags<pxStaticText> &sr
 {
     target.Add(src.window, src.flags);
 }
+
+namespace pxGUI
+{
+class StaticText : public wxStaticText
+{
+public:
+    StaticText(wxWindow *parent, wxWindowID id, const wxString &text, long style = 0, bool wrapped = true);
+
+    void SetText(const wxString &unwrapped_text);
+
+private:
+    void EraseBackgroundHandler(wxEraseEvent &evt);
+    void WrappedSizeEventHandler(wxSizeEvent &evt);
+    void UnwrappedSizeEventHandler(wxSizeEvent &evt);
+
+    wxString m_text;
+    bool m_text_changed = false;
+    int m_lines = 1;
+};
+}
