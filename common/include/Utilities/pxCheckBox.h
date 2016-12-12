@@ -18,6 +18,8 @@
 #include <wx/wx.h>
 #include "wxGuiTools.h"
 
+#include <map>
+
 // -------------------------------------------------------------------------------------
 //  pxCheckBox
 // --------------------------------------------------------------------------------------
@@ -99,4 +101,73 @@ template <>
 inline void operator+=(wxSizer &target, const pxWindowAndFlags<pxCheckBox> &src)
 {
     target.Add(src.window, src.flags);
+}
+
+namespace pxGUI
+{
+template <typename T>
+class CheckBoxPanel : public wxPanel
+{
+public:
+    CheckBoxPanel(wxWindow *parent, const std::map<T, std::pair<wxString, wxString>> &options)
+        : wxPanel(parent)
+    {
+        wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
+        for (auto &option : options) {
+            auto &key = option.first;
+            auto &label = option.second.first;
+            auto &tooltip = option.second.second;
+
+            auto pair = m_map.emplace(key, new wxCheckBox(this, wxID_ANY, label));
+            if (!pair.second)
+                assert(0);
+
+            sizer->Add(pair.first->second, wxSizerFlags().Expand().Border(wxALL, 1));
+            pxSetToolTip(pair.first->second, tooltip);
+        }
+
+        SetSizer(sizer);
+    }
+
+    void SetFontWeight(const T &key, wxFontWeight weight)
+    {
+        auto it = m_map.find(key);
+        if (it == m_map.end())
+            return;
+
+        wxFont font = it->second->GetFont();
+        font.SetWeight(weight);
+        it->second->SetFont(font);
+    }
+
+    void SetValue(const T &key, bool value)
+    {
+        auto it = m_map.find(key);
+        if (it == m_map.end())
+            return;
+
+        it->second->SetValue(value);
+    }
+
+    bool GetValue(const T &key) const
+    {
+        auto it = m_map.find(key);
+        if (it == m_map.end())
+            return false;
+
+        return it->second->IsChecked();
+    }
+
+    std::vector<T> GetKeys() const
+    {
+        std::vector<T> keys;
+        keys.reserve(m_map.size());
+        for (auto &pair : m_map)
+            keys.emplace_back(pair.first);
+        return keys;
+    }
+
+private:
+    std::map<T, wxCheckBox *> m_map;
+};
 }
