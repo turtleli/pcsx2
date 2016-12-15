@@ -47,20 +47,17 @@ namespace PathDefs
 	extern wxDirName GetProgramDataDir();
 	extern wxDirName GetDocuments();
 	extern wxDirName GetDocuments( DocsModeType mode );
-	extern wxDirName GetThemes();
 }
 
 extern DocsModeType		DocsFolderMode;				// 
 extern bool				UseDefaultSettingsFolder;	// when TRUE, pcsx2 derives the settings folder from the DocsFolderMode
 extern bool				UseDefaultPluginsFolder;
-extern bool				UseDefaultThemesFolder;
 
 extern wxDirName		CustomDocumentsFolder;		// allows the specification of a custom home folder for PCSX2 documents files.
 extern wxDirName		SettingsFolder;				// dictates where the settings folder comes from, *if* UseDefaultSettingsFolder is FALSE.
 
 extern wxDirName		InstallFolder;
 extern wxDirName		PluginsFolder;
-extern wxDirName		ThemesFolder;
 
 extern wxDirName GetSettingsFolder();
 extern wxString  GetVmSettingsFilename();
@@ -279,10 +276,6 @@ public:
 	wxString	LanguageCode;
 
 	int			RecentIsoCount;		// number of files displayed in the Recent Isos list.
-
-	// String value describing the desktop theme to use for pcsk2 (icons and background images)
-	// The theme name is used to look up files in the themes folder (relative to the executable).
-	wxString	DeskTheme;
 
 	// Specifies the size of icons used in Listbooks; specifically the PCSX2 Properties dialog box.
 	// Realistic values range from 96x96 to 24x24.
