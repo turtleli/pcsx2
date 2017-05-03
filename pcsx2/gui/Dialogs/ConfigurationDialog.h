@@ -279,4 +279,15 @@ private:
 
     wxStdDialogButtonSizer *m_standard_button_sizer;
 };
+
+class ComponentsDialog : public BaseNotebookConfigDialog
+{
+public:
+    ComponentsDialog(wxWindow *parent);
+
+    static const wxString GetDialogName();
+
+private:
+    void SettingsPageHandler(wxCommandEvent &evt);
+};
 }

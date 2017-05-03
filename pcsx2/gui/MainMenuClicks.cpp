@@ -67,6 +67,7 @@ void MainEmuFrame::Menu_GSSettings_Click(wxCommandEvent &event)
 void MainEmuFrame::Menu_SelectPluginsBios_Click(wxCommandEvent &event)
 {
 	AppOpenDialog<ComponentsConfigDialog>( this );
+	AppOpenDialogByName<pxGUIDialogs::ComponentsDialog>(this);
 }
 
 void MainEmuFrame::Menu_ChangeLang(wxCommandEvent &event) // Always in English

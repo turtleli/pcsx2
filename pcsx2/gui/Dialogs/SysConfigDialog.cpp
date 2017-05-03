@@ -570,6 +570,14 @@ ComponentsDialog::ComponentsDialog(wxWindow *parent)
     SetSizerAndFit(sizer);
 
     Bind(pxEvt_SetSettingsPage, &ComponentsDialog::SettingsPageHandler, this);
+
+    if (auto apply = FindWindow(wxID_APPLY))
+        apply->Disable();
+
+    pxSettingEvent setting_event(GetId(), pxEVT_SETTING, *g_Conf,
+                                 pxSettingEvent::Action::ApplyConfigToGUI);
+    for (size_t n = 0; n < m_notebook->GetPageCount(); ++n)
+        m_notebook->GetPage(n)->ProcessWindowEvent(setting_event);
 }
 
 void ComponentsDialog::SettingsPageHandler(wxCommandEvent &evt)

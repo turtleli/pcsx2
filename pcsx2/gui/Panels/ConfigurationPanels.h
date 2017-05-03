@@ -24,6 +24,7 @@
 #include <wx/statline.h>
 #include <wx/dnd.h>
 #include <memory>
+#include <array>
 
 #include "AppCommon.h"
 #include "ApplyState.h"
@@ -851,5 +852,48 @@ private:
     pxGUI::StaticText *m_manual_gamefixes_text;
     wxStaticBox *m_gamefix_box;
     pxGUI::CheckBoxPanel<GamefixId> *m_gamefix_choices;
+};
+
+class PluginSelectorPanel : public wxPanel
+{
+public:
+    PluginSelectorPanel(wxWindow *parent);
+
+private:
+    void UpdateDirPickerState();
+
+    void DirPickerEventHandler(wxFileDirPickerEvent &evt);
+    void PluginConfigureHandler(wxCommandEvent &evt);
+    void DefaultsCheckboxHandler(wxCommandEvent &evt);
+
+    void ApplyGUIToConfig(AppConfig &config);
+    void ApplyConfigToGUI(AppConfig &config);
+    void SettingEventHandler(pxSettingEvent &evt);
+
+    void RefreshPlugins();
+
+    struct PluginGroup
+    {
+        wxChoice *choice;
+        wxButton *button;
+        std::vector<wxString> filenames;
+    };
+
+    std::array<PluginGroup, PluginId_Count> m_plugin_group;
+    wxDirPickerCtrl *m_plugin_dirpicker;
+    wxCheckBox *m_plugin_use_default_checkbox;
+};
+
+class BIOSSelectorPanel : public wxPanel
+{
+public:
+    BIOSSelectorPanel(wxWindow *parent);
+
+private:
+    void ApplyGUIToConfig(AppConfig &config);
+    void ApplyConfigToGUI(AppConfig &config);
+
+    wxListBox *m_listbox;
+    std::vector<wxString> m_filenames;
 };
 }

@@ -17,6 +17,7 @@
 
 #include <wx/dynlib.h>
 #include <wx/dir.h>
+#include <wx/filepicker.h>
 #include <memory>
 
 #include "App.h"
@@ -817,4 +818,188 @@ void Panels::PluginSelectorPanel::EnumThread::ExecuteTaskInThread()
 	m_master.GetEventHandler()->AddPendingEvent( done );
 
 	DevCon.WriteLn( "Plugin Enumeration Thread complete!" );
+}
+
+namespace pxGUIPanels
+{
+PluginSelectorPanel::PluginSelectorPanel(wxWindow *parent)
+    : wxPanel(parent)
+{
+    auto sizer = new wxBoxSizer(wxVERTICAL);
+    auto plugin_choice_sizer = new wxFlexGridSizer(3);
+    plugin_choice_sizer->AddGrowableCol(1);
+
+    wxString configure(_("Configure..."));
+    // tbl_PluginInfo is stupid, so you have to check that the shortname is null...
+    for (const PluginInfo *pi = tbl_PluginInfo; pi->shortname != nullptr; ++pi) {
+        auto static_text = new pxGUI::StaticText(this, wxID_ANY, pi->GetShortname());
+        auto &plugin_group = m_plugin_group[pi->id];
+
+        plugin_group.choice = new wxChoice(this, wxID_ANY);
+        plugin_group.button = new wxButton(this, wxID_ANY, configure);
+        plugin_group.button->Disable();
+        // Need to identify what button is pressed in the configure event handler.
+        plugin_group.button->SetClientData(reinterpret_cast<void*>(static_cast<uptr>(pi->id)));
+
+        plugin_choice_sizer->Add(static_text, wxSizerFlags().Align(wxALIGN_CENTRE_VERTICAL).Border(wxALL, 5));
+        plugin_choice_sizer->Add(plugin_group.choice, wxSizerFlags().Expand().Border(wxALL, 5));
+        plugin_choice_sizer->Add(plugin_group.button, wxSizerFlags().Border(wxALL, 5));
+
+        Bind(wxEVT_BUTTON, &PluginSelectorPanel::PluginConfigureHandler, this, plugin_group.button->GetId());
+    }
+    sizer->Add(plugin_choice_sizer, wxSizerFlags().Expand());
+
+    wxFileName plugin_path = PathDefs::Get(FolderId_Plugins).Normalize(wxPATH_NORM_ALL).GetFilename();
+
+    auto plugin_box = new wxStaticBoxSizer(wxVERTICAL, this, _("Plugins Search Path:"));
+    auto plugin_text = new pxGUI::StaticText(plugin_box->GetStaticBox(), wxID_ANY,
+                                             _("Click the Browse button to select a different folder for PCSX2 plugins."),
+                                             wxALIGN_CENTRE_HORIZONTAL);
+    m_plugin_dirpicker = new wxDirPickerCtrl(plugin_box->GetStaticBox(), wxID_ANY, {},
+                                             _("Select a folder with PCSX2 plugins"),
+                                             wxDefaultPosition, wxDefaultSize,
+                                             wxDIRP_DIR_MUST_EXIST | wxDIRP_USE_TEXTCTRL);
+    m_plugin_use_default_checkbox = new wxCheckBox(plugin_box->GetStaticBox(),
+                                                   wxID_ANY,
+                                                   _("Use default setting"));
+    plugin_box->Add(plugin_text, wxSizerFlags().Expand());
+    plugin_box->Add(m_plugin_dirpicker, wxSizerFlags().Expand());
+    plugin_box->Add(m_plugin_use_default_checkbox, wxSizerFlags());
+
+    sizer->Add(plugin_box, wxSizerFlags().Expand());
+    SetSizer(sizer);
+
+    Bind(wxEVT_DIRPICKER_CHANGED, &PluginSelectorPanel::DirPickerEventHandler, this);
+    Bind(wxEVT_CHECKBOX, &PluginSelectorPanel::DefaultsCheckboxHandler, this);
+    Bind(pxEVT_SETTING, &PluginSelectorPanel::SettingEventHandler, this);
+}
+
+void PluginSelectorPanel::UpdateDirPickerState()
+{
+    const bool use_default = m_plugin_use_default_checkbox->IsChecked();
+    if (use_default) {
+        auto default_path = PathDefs::Get(FolderId_Plugins).GetFilename().GetPath();
+        if (m_plugin_dirpicker->GetPath() != default_path) {
+            m_plugin_dirpicker->SetPath(default_path);
+            RefreshPlugins();
+        }
+    }
+    m_plugin_dirpicker->Enable(!use_default);
+}
+
+void PluginSelectorPanel::ApplyGUIToConfig(AppConfig &config)
+{
+    config.Folders.Set(FolderId_Plugins, m_plugin_dirpicker->GetPath(), m_plugin_use_default_checkbox->IsChecked());
+}
+
+void PluginSelectorPanel::ApplyConfigToGUI(AppConfig &config)
+{
+    const bool use_default = config.Folders.IsDefault(FolderId_Plugins);
+    m_plugin_use_default_checkbox->SetValue(use_default);
+
+    UpdateDirPickerState();
+    if (!use_default) {
+        m_plugin_dirpicker->SetPath(config.Folders[FolderId_Plugins].GetFilename().GetPath());
+        RefreshPlugins();
+    }
+}
+
+void PluginSelectorPanel::SettingEventHandler(pxSettingEvent & evt)
+{
+    using Action = pxSettingEvent::Action;
+    Action action = evt.GetAction();
+    AppConfig &config = evt.GetConfig();
+    if (action == Action::ApplyGUIToConfig) {
+        ApplyGUIToConfig(config);
+    } else {
+        ApplyConfigToGUI(config);
+    }
+}
+
+void PluginSelectorPanel::DirPickerEventHandler(wxFileDirPickerEvent &evt)
+{
+    evt.Skip();
+
+    RefreshPlugins();
+}
+
+void PluginSelectorPanel::RefreshPlugins()
+{
+    // Windows pretty well has a strict "must end in .dll" rule.
+    wxString pattern("*" + wxDynamicLibrary::GetDllExt());
+#ifndef __WXMSW__
+    // Other platforms seem to like to version their libs after the .so extension:
+    //    blah.so.3.1.?
+    pattern += '*';
+#endif
+
+    for (auto &plugin_group: m_plugin_group)
+        plugin_group.choice->Clear();
+
+    wxArrayString filenames;
+    wxDir::GetAllFiles(m_plugin_dirpicker->GetPath(), &filenames, pattern, wxDIR_FILES);
+    for (auto &filename : filenames) {
+        wxFileName file(filename);
+        file.MakeAbsolute();
+
+        try {
+            PluginEnumerator penum(file.GetFullPath());
+
+            for (const PluginInfo *pi = tbl_PluginInfo; pi->shortname != nullptr; ++pi) {
+                const PluginsEnum_t pid = pi->id;
+                if (!penum.CheckVersion(pid))
+                    continue;
+
+                wxString version_string;
+                penum.GetVersionString(version_string, pid);
+                int index = m_plugin_group[pid].choice->Append(penum.GetName() + " " + version_string + " [" + file.GetName() + ']');
+                m_plugin_group[pid].filenames.emplace_back(file.GetFullPath());
+                if (g_Conf->FullpathMatchTest(pid, file.GetFullPath())) {
+                    m_plugin_group[pid].choice->SetSelection(index);
+                    m_plugin_group[pid].button->Enable();
+                }
+            }
+        } catch (Exception::NotEnumerablePlugin &ex) {
+            Console.Warning(ex.FormatDiagnosticMessage());
+        }
+        // wx3.0 provides an error message if the library fails to load - we don't
+        // need to provide one ourselves
+        catch (Exception::BadStream &) {
+        }
+    }
+}
+
+void PluginSelectorPanel::PluginConfigureHandler(wxCommandEvent &evt)
+{
+    const auto id = static_cast<PluginsEnum_t>(reinterpret_cast<uptr>(evt.GetClientData()));
+    const auto &plugin_group = m_plugin_group[id];
+
+    auto &filename = plugin_group.filenames[plugin_group.choice->GetSelection()];
+
+    if (CorePlugins.AreLoaded()) {
+        if (g_Conf->FullpathMatchTest(id, filename)) {
+            wxWindowDisabler disabler;
+            ScopedCoreThreadPause paused_core(new SysExecEvent_SaveSinglePlugin(id));
+            CorePlugins.Configure(id);
+        } else {
+            Console.Warning("(PluginSelector) Plugin name mismatch, configuration request ignored.");
+        }
+        return;
+    }
+
+    // I think this will only be accessible in the first time dialog???
+    wxDynamicLibrary dynlib(filename);
+    wxString symbolname = tbl_PluginInfo[id].GetShortname() + L"configure";
+    if (auto configfunc = reinterpret_cast<ConfigureFnptr>(dynlib.GetSymbol(symbolname))) {
+        wxWindowDisabler disabler;
+        wxDoNotLogInThisScope quiettime;
+        configfunc();
+    }
+}
+void PluginSelectorPanel::DefaultsCheckboxHandler(wxCommandEvent & evt)
+{
+    evt.Skip();
+
+    UpdateDirPickerState();
+}
 }

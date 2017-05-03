@@ -176,3 +176,49 @@ void Panels::BiosSelectorPanel::DoRefresh()
 			m_ComboBox->SetSelection( sel );
 	}
 }
+
+namespace pxGUIPanels
+{
+
+BIOSSelectorPanel::BIOSSelectorPanel(wxWindow *parent)
+    : wxPanel(parent)
+{
+    wxFileName bios_path = PathDefs::Get(FolderId_Bios).Normalize(wxPATH_NORM_ALL).GetFilename();
+
+    auto sizer = new wxBoxSizer(wxVERTICAL);
+    m_listbox = new wxListBox(this, wxID_ANY);
+    auto bios_box = new wxStaticBoxSizer(wxVERTICAL, this, _("BIOS Search Path:"));
+    auto bios_text = new pxGUI::StaticText(bios_box->GetStaticBox(), wxID_ANY, _("Click the Browse button to select a different folder where PCSX2 will look for PS2 BIOS roms."), wxALIGN_CENTRE_HORIZONTAL);
+    auto dir_picker =
+        new wxDirPickerCtrl(bios_box->GetStaticBox(), wxID_ANY, bios_path.GetPath(), _("Select folder with PS2 BIOS roms"),
+                            wxDefaultPosition, wxDefaultSize,
+                            wxDIRP_DIR_MUST_EXIST | wxDIRP_USE_TEXTCTRL);
+    bios_box->Add(bios_text, wxSizerFlags().Expand());
+    bios_box->Add(dir_picker, wxSizerFlags().Expand());
+    sizer->Add(m_listbox, wxSizerFlags().Expand());
+    sizer->Add(bios_box, wxSizerFlags().Expand());
+    SetSizer(sizer);
+
+    const wxFileName current_bios(g_Conf->FullpathToBios());
+
+    wxArrayString filenames;
+    wxDir::GetAllFiles(bios_path.GetFullPath(), &filenames, {}, wxDIR_FILES);
+    for (auto &filename : filenames) {
+        wxString description;
+        if (!IsBIOS(filename, description))
+            continue;
+        int index = m_listbox->Append(description);
+        m_filenames.push_back(filename);
+        if (current_bios == wxFileName(filename))
+            m_listbox->SetSelection(index);
+    }
+}
+
+void BIOSSelectorPanel::ApplyConfigToGUI(AppConfig &config)
+{
+}
+
+void BIOSSelectorPanel::ApplyGUIToConfig(AppConfig &config)
+{
+}
+}
