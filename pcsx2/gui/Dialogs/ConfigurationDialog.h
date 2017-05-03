@@ -15,12 +15,14 @@
 
 #pragma once
 
-#include <wx/wx.h>
-#include <wx/propdlg.h>
-
 #include "AppCommon.h"
 #include "ApplyState.h"
 #include "App.h"
+
+#include <wx/wx.h>
+#include <wx/propdlg.h>
+#include <wx/notebook.h>
+#include <map>
 
 namespace Panels
 {
@@ -235,4 +237,46 @@ namespace Dialogs
 		bool ConvertToFile( const wxFileName& sourcePath, const wxFileName& targetPath, const u32 sizeInMB );
 		bool ConvertToFolder( const wxFileName& sourcePath, const wxFileName& targetPath );
 	};
+}
+
+namespace pxGUIDialogs
+{
+class BaseNotebookConfigDialog : public wxDialog
+{
+public:
+    BaseNotebookConfigDialog(wxWindow *parent, const wxString &label);
+
+protected:
+    template <typename T>
+    void AddBookPage(const wxString &label);
+
+    //void CommandEventHandler(wxCommandEvent &evt);
+    wxNotebook *m_notebook;
+    std::vector<wxString> m_pages;
+};
+
+class EmulationSettingsDialog : public BaseNotebookConfigDialog
+{
+public:
+    EmulationSettingsDialog(wxWindow *parent);
+    ~EmulationSettingsDialog();
+
+    static const wxString GetDialogName();
+
+private:
+    void ApplyPresetsToGUI();
+    void UpdateState();
+
+    void SettingsPageHandler(wxCommandEvent &evt);
+    void ApplyHandler(wxCommandEvent &evt);
+    void PresetHandler(wxCommandEvent &evt);
+    void CommandEventHandler(wxCommandEvent &evt);
+    void DefaultsHandler(wxCommandEvent &evt);
+    void RememberSizeHandler();
+
+    wxCheckBox *m_preset_checkbox;
+    wxChoice *m_preset_choices;
+
+    wxStdDialogButtonSizer *m_standard_button_sizer;
+};
 }

@@ -622,3 +622,234 @@ namespace Panels
 	};
 }
 
+// Move definitions elsewhere
+class pxSettingEvent : public wxEvent
+{
+public:
+    enum class Action {
+        ApplyGUIToConfig,
+        ApplyConfigToGUI,
+        ApplyDefaultsToGUI,
+        ApplyPresetToGUI,
+    };
+
+    pxSettingEvent(int id, wxEventType event_type, AppConfig &config, Action action);
+    wxEvent *Clone() const final;
+    AppConfig &GetConfig() const;
+    Action GetAction() const;
+
+private:
+    AppConfig &m_config;
+    Action m_action;
+};
+
+wxDECLARE_EVENT(pxEVT_SETTING, pxSettingEvent);
+
+namespace pxGUIPanels
+{
+class EEIOPPanel : public wxPanel
+{
+    enum class EEExecMode {
+        Interpreter,
+        InterpreterWithEECache,
+        Recompiler
+    };
+
+    enum class IOPExecMode {
+        Interpreter,
+        Recompiler
+    };
+
+    enum class EEFPUClampMode {
+        None,
+        Normal,
+        ExtraAndPreserveSign,
+        Full
+    };
+
+public:
+    EEIOPPanel(wxWindow *parent);
+
+private:
+    wxSizer *CreateEEIOPRow();
+    wxSizer *CreateRoundClampingRow();
+
+    void ApplyGUIToConfig(AppConfig &config);
+    void ApplyConfigToGUI(AppConfig &config);
+    void SettingEventHandler(pxSettingEvent &evt);
+
+    pxGUI::RadioPanel<EEExecMode> *m_ee_choices;
+    pxGUI::RadioPanel<IOPExecMode> *m_iop_choices;
+    pxGUI::RadioPanel<SSE_RoundMode> *m_round_choices;
+    pxGUI::RadioPanel<EEFPUClampMode> *m_clamp_choices;
+};
+
+class VUPanel : public wxPanel
+{
+    enum class VUExecMode {
+        Interpreter,
+        MicroVURecompiler,
+        SuperVURecompiler
+    };
+
+    enum class VUClampMode {
+        None,
+        Normal,
+        Extra,
+        ExtraAndPreserveSign
+    };
+
+public:
+    VUPanel(wxWindow *parent);
+
+private:
+    wxSizer *CreateVURow();
+    wxSizer *CreateRoundClampingRow();
+
+    void ApplyGUIToConfig(AppConfig &config);
+    void ApplyConfigToGUI(AppConfig &config);
+    void SettingEventHandler(pxSettingEvent &evt);
+
+    pxGUI::RadioPanel<VUExecMode> *m_vu0_choices;
+    pxGUI::RadioPanel<VUExecMode> *m_vu1_choices;
+    pxGUI::RadioPanel<SSE_RoundMode> *m_round_choices;
+    pxGUI::RadioPanel<VUClampMode> *m_clamp_choices;
+};
+
+class GSPanel : public wxPanel
+{
+    enum class FrameSkip {
+        Disabled,
+        SkipOnTurbo,
+        SkipConstantly
+    };
+
+public:
+    GSPanel(wxWindow *parent);
+
+private:
+    wxSizer *CreateFrameLimiterBox();
+    wxSizer *CreateFrameSkipBox();
+
+    void ApplyGUIToConfig(AppConfig &config);
+    void ApplyConfigToGUI(AppConfig &config, bool apply_from_preset);
+    void SettingEventHandler(pxSettingEvent &evt);
+
+    // Framelimiter box
+    wxCheckBox *m_disable_framelimiter;
+    pxGUI::StaticText *m_base_framerate_text;
+    wxSpinCtrl *m_base_framerate;
+    wxSpinCtrl *m_slow_framerate;
+    wxSpinCtrl *m_turbo_framerate;
+    pxGUI::StaticText *m_ntsc_framerate_text;
+    wxTextCtrl *m_ntsc_framerate;
+    pxGUI::StaticText *m_pal_framerate_text;
+    wxTextCtrl *m_pal_framerate;
+
+    // Frameskipping box
+    wxStaticBox *m_frameskipping_box;
+    pxGUI::RadioPanel<FrameSkip> *m_frame_skip_choices;
+    pxGUI::StaticText *m_frames_to_draw_text;
+    wxSpinCtrl *m_frames_to_draw;
+    pxGUI::StaticText *m_frames_to_skip_text;
+    wxSpinCtrl *m_frames_to_skip;
+
+    // Misc
+    wxCheckBox *m_sync_mtgs;
+    pxGUI::StaticText *m_sync_mtgs_text;
+    wxCheckBox *m_disable_gs_output;
+    pxGUI::StaticText *m_disable_gs_output_text;
+};
+
+class GSWindowPanel : public wxPanel
+{
+public:
+    GSWindowPanel(wxWindow *parent);
+
+private:
+    void ApplyGUIToConfig(AppConfig &config);
+    void ApplyConfigToGUI(AppConfig &config, bool apply_from_preset);
+    void SettingEventHandler(pxSettingEvent &evt);
+
+    wxChoice *m_aspect_ratio;
+    wxTextCtrl *m_window_height;
+    wxTextCtrl *m_window_width;
+    wxTextCtrl *m_zoom;
+
+    wxCheckBox *m_disable_resize_checkbox;
+    wxCheckBox *m_hide_mouse_checkbox;
+    wxCheckBox *m_hide_window_checkbox;
+    wxCheckBox *m_default_fullscreen_checkbox;
+    wxCheckBox *m_double_click_fullscreen_checkbox;
+    wxCheckBox *m_switch_aspect_ratio_checkbox;
+    wxCheckBox *m_vsync_refresh_checkbox;
+};
+
+class SpeedhacksPanel : public wxPanel
+{
+public:
+    SpeedhacksPanel(wxWindow *parent);
+
+private:
+    wxSizer *CreateSliderRow();
+    wxSizer *CreateHacksRow();
+
+    void UpdateSpeedhacksState(bool presets_enabled = false);
+    void UpdateEECyclerateMessage();
+    void UpdateVUStealingMessage();
+
+    void EnableSpeedhacksCheckboxHandler(wxCommandEvent &evt);
+    void EESliderEventHandler(wxCommandEvent &evt);
+    void VUSliderEventHandler(wxCommandEvent &evt);
+
+    void ApplyGUIToConfig(AppConfig &config);
+    void ApplyConfigToGUI(AppConfig &config, bool apply_from_preset);
+    void SettingEventHandler(pxSettingEvent &evt);
+
+    wxCheckBox *m_enable_speedhacks;
+    pxGUI::StaticText *m_enable_speedhacks_text;
+
+    // Sliders
+    wxStaticBox *m_ee_cyclerate_box;
+    wxSlider *m_ee_cyclerate;
+    pxGUI::StaticText *m_ee_cyclerate_text;
+    wxStaticBox *m_vu_cyclesteal_box;
+    wxSlider *m_vu_cyclesteal;
+    pxGUI::StaticText *m_vu_cyclesteal_text;
+
+    // Other
+    wxStaticBox *m_otherhacks_box;
+    wxCheckBox *m_intc;
+    wxCheckBox *m_wait_loop;
+    wxCheckBox *m_fast_cdvd;
+
+    // MicroVU + stray restore defaults
+    wxCheckBox *m_mvu_flag;
+    pxGUI::StaticText *m_mvu_flag_text;
+    wxCheckBox *m_mtvu;
+    pxGUI::StaticText *m_mtvu_text;
+
+    std::map<int, wxString> m_ee_cyclerate_messages;
+    std::map<int, wxString> m_vu_cyclesteal_messages;
+};
+
+class GamefixesPanel : public wxPanel
+{
+public:
+    GamefixesPanel(wxWindow *parent);
+
+private:
+    void UpdateGamefixesState(bool presets_enabled = false);
+
+    void EnableManualGamefixesCheckboxHandler(wxCommandEvent &evt);
+
+    void ApplyGUIToConfig(AppConfig &config);
+    void ApplyConfigToGUI(AppConfig &config);
+    void SettingEventHandler(pxSettingEvent &evt);
+
+    wxCheckBox *m_manual_gamefixes;
+    pxGUI::StaticText *m_manual_gamefixes_text;
+    wxStaticBox *m_gamefix_box;
+    pxGUI::CheckBoxPanel<GamefixId> *m_gamefix_choices;
+};
+}

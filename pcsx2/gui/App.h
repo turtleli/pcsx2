@@ -691,6 +691,19 @@ wxWindow* AppOpenDialog( wxWindow* parent=NULL )
 	return window;
 }
 
+template <typename T>
+T *AppOpenDialogByName(wxWindow *parent = nullptr)
+{
+    T *window = static_cast<T*>(wxWindow::FindWindowByName(T::GetDialogName()));
+
+    if (window == nullptr)
+        window = new T(parent);
+
+    window->Show();
+    window->SetFocus();
+    return window;
+}
+
 // --------------------------------------------------------------------------------------
 //  AppOpenModalDialog
 // --------------------------------------------------------------------------------------

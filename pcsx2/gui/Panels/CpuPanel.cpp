@@ -16,6 +16,9 @@
 #include "PrecompiledHeader.h"
 #include "ConfigurationPanels.h"
 
+#include <array>
+#include <tuple>
+
 using namespace pxSizerFlags;
 
 Panels::BaseAdvancedCpuOptions::BaseAdvancedCpuOptions( wxWindow* parent )
@@ -421,4 +424,312 @@ void Panels::CpuPanelEE::EECache_Event(wxCommandEvent& event)
 {
 	m_check_EECacheEnable->Enable(m_panel_RecEE->GetSelection() == 0);
 	event.Skip();
+}
+
+namespace pxGUIPanels
+{
+static wxWindow *CreateNoticeRow(wxWindow *parent)
+{
+    return new pxGUI::StaticText(parent, wxID_ANY, _("Notice: Most games are fine with the default options."), wxALIGN_CENTRE_HORIZONTAL);
+}
+
+EEIOPPanel::EEIOPPanel(wxWindow *parent)
+    : wxPanel(parent)
+{
+    auto sizer = new wxBoxSizer(wxVERTICAL);
+    SetSizer(sizer);
+
+    const auto sizer_flags = wxSizerFlags().Expand().Border(wxALL);
+
+    sizer->Add(CreateNoticeRow(this), sizer_flags);
+    sizer->Add(CreateEEIOPRow(), sizer_flags);
+    sizer->Add(new wxStaticLine(this), sizer_flags);
+    sizer->Add(CreateRoundClampingRow(), sizer_flags);
+
+    auto restore_defaults = new wxButton(this, wxID_DEFAULT, _("Restore Defaults"));
+    sizer->Add(restore_defaults, wxSizerFlags().Border(wxALL).Right());
+
+    Bind(pxEVT_SETTING, &EEIOPPanel::SettingEventHandler, this);
+}
+
+wxSizer *EEIOPPanel::CreateEEIOPRow()
+{
+    auto sizer = new wxGridSizer(2);
+    wxSizerFlags sizer_flags = wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT);
+
+    const std::map<EEExecMode, std::pair<wxString, wxString>> ee_exec_mode_options{
+        {EEExecMode::Interpreter, {_("Interpreter"), _("Pretty slow; provided for diagnostic purposes only.")}},
+        {EEExecMode::InterpreterWithEECache, {_("Interpreter with EE Cache"), _("Pretty slow; provided for diagnostic purposes only.")}},
+        {EEExecMode::Recompiler, {_("Recompiler"), _("Performs just-in-time binary translation of 64-bit MIPS-IV machine code to x86.")}},
+    };
+
+    auto ee_sizer = new wxStaticBoxSizer(wxVERTICAL, this, "EmotionEngine");
+    m_ee_choices = new pxGUI::RadioPanel<EEExecMode>(ee_sizer->GetStaticBox(), ee_exec_mode_options, EEExecMode::Recompiler);
+    m_ee_choices->SetFontWeight(EEExecMode::Recompiler, wxFontWeight::wxFONTWEIGHT_BOLD);
+    ee_sizer->Add(m_ee_choices, sizer_flags);
+
+    const std::map<IOPExecMode, std::pair<wxString, wxString>> iop_exec_mode_options{
+        {IOPExecMode::Interpreter, {_("Interpreter"), _("Pretty slow; provided for diagnostic purposes only.")}},
+        {IOPExecMode::Recompiler, {_("Recompiler"), _("Performs just-in-time binary translation of 32-bit MIPS-I machine code to x86.")}},
+    };
+
+    auto iop_sizer = new wxStaticBoxSizer(wxVERTICAL, this, "IOP");
+    m_iop_choices = new pxGUI::RadioPanel<IOPExecMode>(iop_sizer->GetStaticBox(), iop_exec_mode_options, IOPExecMode::Recompiler);
+    m_iop_choices->SetFontWeight(IOPExecMode::Recompiler, wxFontWeight::wxFONTWEIGHT_BOLD);
+    iop_sizer->Add(m_iop_choices, sizer_flags);
+
+    sizer->Add(ee_sizer, wxSizerFlags().Expand().Border(wxRIGHT));
+    sizer->Add(iop_sizer, wxSizerFlags().Expand().Border(wxLEFT));
+
+    return sizer;
+}
+
+wxSizer *EEIOPPanel::CreateRoundClampingRow()
+{
+    auto sizer = new wxStaticBoxSizer(wxVERTICAL, this, _("EE / FPU Advanced Recompiler Options"));
+
+    const std::map<SSE_RoundMode, std::pair<wxString, wxString>> round_mode_options{
+        {SSE_RoundMode::SSEround_Nearest, {_("Nearest"), ""}},
+        {SSE_RoundMode::SSEround_NegInf, {_("Negative"), ""}},
+        {SSE_RoundMode::SSEround_PosInf, {_("Positive"), ""}},
+        {SSE_RoundMode::SSEround_Chop, {_("Chop / Zero"), ""}},
+    };
+
+    auto round_sizer = new wxStaticBoxSizer(wxVERTICAL, sizer->GetStaticBox(), _("Round Mode"));
+    m_round_choices = new pxGUI::RadioPanel<SSE_RoundMode>(round_sizer->GetStaticBox(), round_mode_options, SSE_RoundMode::SSEround_Chop);
+    m_round_choices->SetFontWeight(SSE_RoundMode::SSEround_Chop, wxFontWeight::wxFONTWEIGHT_BOLD);
+    round_sizer->Add(m_round_choices, wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT));
+
+    const std::map<EEFPUClampMode, std::pair<wxString, wxString>> ee_fpu_clamp_mode_options{
+        {EEFPUClampMode::None, {_("None"), ""}},
+        {EEFPUClampMode::Normal, {_("Normal"), ""}},
+        {EEFPUClampMode::ExtraAndPreserveSign, {_("Extra + Preserve Sign"), ""}},
+        {EEFPUClampMode::Full, {_("Full"), ""}},
+    };
+
+    auto clamp_sizer = new wxStaticBoxSizer(wxVERTICAL, sizer->GetStaticBox(), _("Clamping Mode"));
+    m_clamp_choices = new pxGUI::RadioPanel<EEFPUClampMode>(clamp_sizer->GetStaticBox(), ee_fpu_clamp_mode_options, EEFPUClampMode::Normal);
+    m_clamp_choices->SetFontWeight(EEFPUClampMode::Normal, wxFontWeight::wxFONTWEIGHT_BOLD);
+    clamp_sizer->Add(m_clamp_choices, wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT));
+
+    auto round_clamp_sizer = new wxGridSizer(2);
+    round_clamp_sizer->Add(round_sizer, wxSizerFlags().Expand().Border(wxRIGHT));
+    round_clamp_sizer->Add(clamp_sizer, wxSizerFlags().Expand().Border(wxLEFT));
+    sizer->Add(round_clamp_sizer, wxSizerFlags().Expand().Border(wxALL));
+
+    return sizer;
+}
+
+void EEIOPPanel::ApplyGUIToConfig(AppConfig &config)
+{
+    Pcsx2Config::CpuOptions &cpu_options(config.EmuOptions.Cpu);
+
+    auto ee_mode = m_ee_choices->GetValue();
+    cpu_options.Recompiler.EnableEE = ee_mode == EEExecMode::Recompiler;
+    cpu_options.Recompiler.EnableEECache = ee_mode == EEExecMode::InterpreterWithEECache;
+
+    auto iop_mode = m_iop_choices->GetValue();
+    cpu_options.Recompiler.EnableIOP = iop_mode == IOPExecMode::Recompiler;
+
+    cpu_options.sseMXCSR.SetRoundMode(m_round_choices->GetValue());
+    // Copied from older code - Is it necessary to set these here?
+    cpu_options.sseMXCSR.DenormalsAreZero = 1;
+    cpu_options.sseMXCSR.FlushToZero = 1;
+
+    auto clamp_mode = m_clamp_choices->GetValue();
+    cpu_options.Recompiler.fpuOverflow = clamp_mode >= EEFPUClampMode::Normal;
+    cpu_options.Recompiler.fpuExtraOverflow = clamp_mode >= EEFPUClampMode::ExtraAndPreserveSign;
+    cpu_options.Recompiler.fpuFullMode = clamp_mode >= EEFPUClampMode::Full;
+}
+
+void EEIOPPanel::ApplyConfigToGUI(AppConfig &config)
+{
+    Pcsx2Config::CpuOptions &cpu_options(config.EmuOptions.Cpu);
+
+    if (cpu_options.Recompiler.EnableEE)
+        m_ee_choices->SetValue(EEExecMode::Recompiler);
+    else if (cpu_options.Recompiler.EnableEECache)
+        m_ee_choices->SetValue(EEExecMode::InterpreterWithEECache);
+    else
+        m_ee_choices->SetValue(EEExecMode::Interpreter);
+
+    if (cpu_options.Recompiler.EnableIOP)
+        m_iop_choices->SetValue(IOPExecMode::Recompiler);
+    else
+        m_iop_choices->SetValue(IOPExecMode::Interpreter);
+
+    m_round_choices->SetValue(cpu_options.sseMXCSR.GetRoundMode());
+
+    if (cpu_options.Recompiler.fpuFullMode)
+        m_clamp_choices->SetValue(EEFPUClampMode::Full);
+    else if (cpu_options.Recompiler.fpuExtraOverflow)
+        m_clamp_choices->SetValue(EEFPUClampMode::ExtraAndPreserveSign);
+    else if (cpu_options.Recompiler.fpuOverflow)
+        m_clamp_choices->SetValue(EEFPUClampMode::Normal);
+    else
+        m_clamp_choices->SetValue(EEFPUClampMode::None);
+
+    this->Enable(!config.EnablePresets);
+}
+
+void EEIOPPanel::SettingEventHandler(pxSettingEvent &evt)
+{
+    using Action = pxSettingEvent::Action;
+    Action action = evt.GetAction();
+    AppConfig &config = evt.GetConfig();
+    if (action == Action::ApplyGUIToConfig) {
+        ApplyGUIToConfig(config);
+    } else {
+        ApplyConfigToGUI(config);
+    }
+}
+
+VUPanel::VUPanel(wxWindow *parent)
+    : wxPanel(parent)
+{
+    auto sizer = new wxBoxSizer(wxVERTICAL);
+    SetSizer(sizer);
+
+    const auto sizer_flags = wxSizerFlags().Expand().Border(wxALL);
+
+    sizer->Add(CreateNoticeRow(this), sizer_flags);
+    sizer->Add(CreateVURow(), sizer_flags);
+    sizer->Add(new wxStaticLine(this), sizer_flags);
+    sizer->Add(CreateRoundClampingRow(), sizer_flags);
+
+    auto restore_defaults = new wxButton(this, wxID_DEFAULT, _("Restore Defaults"));
+    sizer->Add(restore_defaults, wxSizerFlags().Border(wxALL).Right());
+
+    Bind(pxEVT_SETTING, &VUPanel::SettingEventHandler, this);
+}
+
+wxSizer *VUPanel::CreateVURow()
+{
+    auto sizer = new wxGridSizer(2);
+    wxSizerFlags sizer_flags = wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT);
+
+    const std::map<VUExecMode, std::pair<wxString, wxString>> vu_exec_mode_options{
+        {VUExecMode::Interpreter, {_("Interpreter"), _("Vector Unit Interpreter. Slow and not very compatible. Only use for diagnostics.")}},
+        {VUExecMode::MicroVURecompiler, {_("microVU Recompiler"), _("New Vector Unit recompiler with much improved compatibility. Recommended.")}},
+        {VUExecMode::SuperVURecompiler, {_("superVU Recompiler [legacy]"), _("Useful for diagnosing bugs or clamping issues in the new mVU recompiler.")}},
+    };
+
+    auto vu0_sizer = new wxStaticBoxSizer(wxVERTICAL, this, "VU0");
+    m_vu0_choices = new pxGUI::RadioPanel<VUExecMode>(vu0_sizer->GetStaticBox(), vu_exec_mode_options, VUExecMode::MicroVURecompiler);
+    m_vu0_choices->SetFontWeight(VUExecMode::MicroVURecompiler, wxFontWeight::wxFONTWEIGHT_BOLD);
+    vu0_sizer->Add(m_vu0_choices, sizer_flags);
+
+    auto vu1_sizer = new wxStaticBoxSizer(wxVERTICAL, this, "VU1");
+    m_vu1_choices = new pxGUI::RadioPanel<VUExecMode>(vu1_sizer->GetStaticBox(), vu_exec_mode_options, VUExecMode::MicroVURecompiler);
+    m_vu1_choices->SetFontWeight(VUExecMode::MicroVURecompiler, wxFontWeight::wxFONTWEIGHT_BOLD);
+    vu1_sizer->Add(m_vu1_choices, sizer_flags);
+
+    sizer->Add(vu0_sizer, wxSizerFlags().Expand().Border(wxRIGHT));
+    sizer->Add(vu1_sizer, wxSizerFlags().Expand().Border(wxLEFT));
+
+    return sizer;
+}
+
+wxSizer *VUPanel::CreateRoundClampingRow()
+{
+    auto sizer = new wxStaticBoxSizer(wxVERTICAL, this, _("VU0 / VU1 Advanced Recompiler Options"));
+
+    const std::map<SSE_RoundMode, std::pair<wxString, wxString>> round_mode_options{
+        {SSE_RoundMode::SSEround_Nearest, {_("Nearest"), ""}},
+        {SSE_RoundMode::SSEround_NegInf, {_("Negative"), ""}},
+        {SSE_RoundMode::SSEround_PosInf, {_("Positive"), ""}},
+        {SSE_RoundMode::SSEround_Chop, {_("Chop / Zero"), ""}},
+    };
+
+    auto round_sizer = new wxStaticBoxSizer(wxVERTICAL, sizer->GetStaticBox(), _("Round Mode"));
+    m_round_choices = new pxGUI::RadioPanel<SSE_RoundMode>(round_sizer->GetStaticBox(), round_mode_options, SSE_RoundMode::SSEround_Chop);
+    m_round_choices->SetFontWeight(SSE_RoundMode::SSEround_Chop, wxFontWeight::wxFONTWEIGHT_BOLD);
+    round_sizer->Add(m_round_choices, wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT));
+
+    const std::map<VUClampMode, std::pair<wxString, wxString>> vu_clamp_mode_options{
+        {VUClampMode::None, {_("None"), ""}},
+        {VUClampMode::Normal, {_("Normal"), ""}},
+        {VUClampMode::Extra, {_("Extra"), ""}},
+        {VUClampMode::ExtraAndPreserveSign, {_("Extra + Preserve Sign"), ""}},
+    };
+
+    auto clamp_sizer = new wxStaticBoxSizer(wxVERTICAL, sizer->GetStaticBox(), _("Clamping Mode"));
+    m_clamp_choices = new pxGUI::RadioPanel<VUClampMode>(clamp_sizer->GetStaticBox(), vu_clamp_mode_options, VUClampMode::Normal);
+    m_clamp_choices->SetFontWeight(VUClampMode::Normal, wxFontWeight::wxFONTWEIGHT_BOLD);
+    clamp_sizer->Add(m_clamp_choices, wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT));
+
+    auto round_clamp_sizer = new wxGridSizer(2);
+    round_clamp_sizer->Add(round_sizer, wxSizerFlags().Expand().Border(wxRIGHT));
+    round_clamp_sizer->Add(clamp_sizer, wxSizerFlags().Expand().Border(wxLEFT));
+    sizer->Add(round_clamp_sizer, wxSizerFlags().Expand().Border(wxALL));
+
+    return sizer;
+}
+
+void VUPanel::ApplyGUIToConfig(AppConfig &config)
+{
+    Pcsx2Config::CpuOptions &cpu_options(config.EmuOptions.Cpu);
+
+    auto vu0_mode = m_vu0_choices->GetValue();
+    cpu_options.Recompiler.EnableVU0 = vu0_mode != VUExecMode::Interpreter;
+    cpu_options.Recompiler.UseMicroVU0 = vu0_mode == VUExecMode::MicroVURecompiler;
+
+    auto vu1_mode = m_vu1_choices->GetValue();
+    cpu_options.Recompiler.EnableVU1 = vu1_mode != VUExecMode::Interpreter;
+    cpu_options.Recompiler.UseMicroVU1 = vu1_mode == VUExecMode::MicroVURecompiler;
+
+    cpu_options.sseVUMXCSR.SetRoundMode(m_round_choices->GetValue());
+    // Copied from older code - Is it necessary to set these here?
+    cpu_options.sseVUMXCSR.DenormalsAreZero = 1;
+    cpu_options.sseVUMXCSR.FlushToZero = 1;
+
+    auto clamp_mode = m_clamp_choices->GetValue();
+    cpu_options.Recompiler.vuOverflow = clamp_mode >= VUClampMode::Normal;
+    cpu_options.Recompiler.vuExtraOverflow = clamp_mode >= VUClampMode::Extra;
+    cpu_options.Recompiler.vuSignOverflow = clamp_mode >= VUClampMode::ExtraAndPreserveSign;
+}
+
+void VUPanel::ApplyConfigToGUI(AppConfig &config)
+{
+    Pcsx2Config::CpuOptions &cpu_options(config.EmuOptions.Cpu);
+
+    if (!cpu_options.Recompiler.EnableVU0)
+        m_vu0_choices->SetValue(VUExecMode::Interpreter);
+    else if (!cpu_options.Recompiler.UseMicroVU0)
+        m_vu0_choices->SetValue(VUExecMode::SuperVURecompiler);
+    else
+        m_vu0_choices->SetValue(VUExecMode::MicroVURecompiler);
+
+    if (!cpu_options.Recompiler.EnableVU1)
+        m_vu1_choices->SetValue(VUExecMode::Interpreter);
+    else if (!cpu_options.Recompiler.UseMicroVU1)
+        m_vu1_choices->SetValue(VUExecMode::SuperVURecompiler);
+    else
+        m_vu1_choices->SetValue(VUExecMode::MicroVURecompiler);
+
+    m_round_choices->SetValue(cpu_options.sseVUMXCSR.GetRoundMode());
+
+    if (cpu_options.Recompiler.vuSignOverflow)
+        m_clamp_choices->SetValue(VUClampMode::ExtraAndPreserveSign);
+    else if (cpu_options.Recompiler.vuExtraOverflow)
+        m_clamp_choices->SetValue(VUClampMode::Extra);
+    else if (cpu_options.Recompiler.vuOverflow)
+        m_clamp_choices->SetValue(VUClampMode::Normal);
+    else
+        m_clamp_choices->SetValue(VUClampMode::None);
+
+    this->Enable(!config.EnablePresets);
+}
+
+void VUPanel::SettingEventHandler(pxSettingEvent &evt)
+{
+    using Action = pxSettingEvent::Action;
+    Action action = evt.GetAction();
+    AppConfig &config = evt.GetConfig();
+    if (action == Action::ApplyGUIToConfig) {
+        ApplyGUIToConfig(config);
+    } else {
+        ApplyConfigToGUI(config);
+    }
+}
 }

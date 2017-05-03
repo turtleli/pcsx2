@@ -33,7 +33,8 @@ using namespace Dialogs;
 
 void MainEmuFrame::Menu_SysSettings_Click(wxCommandEvent &event)
 {
-	AppOpenDialog<SysConfigDialog>( this );
+    //AppOpenDialog<SysConfigDialog>( this );
+    AppOpenDialogByName<pxGUIDialogs::EmulationSettingsDialog>(this);
 }
 
 void MainEmuFrame::Menu_McdSettings_Click(wxCommandEvent &event)
@@ -51,15 +52,16 @@ void MainEmuFrame::Menu_GameDatabase_Click(wxCommandEvent &event)
 void MainEmuFrame::Menu_WindowSettings_Click(wxCommandEvent &event)
 {
 	wxCommandEvent evt( pxEvt_SetSettingsPage );
-	evt.SetString( L"GS Window" );
-	AppOpenDialog<SysConfigDialog>( this )->GetEventHandler()->ProcessEvent( evt );
+	evt.SetString("GS Window");
+	AppOpenDialogByName<pxGUIDialogs::EmulationSettingsDialog>(this)->ProcessWindowEvent(evt);
+	//AppOpenDialog<SysConfigDialog>( this )->GetEventHandler()->ProcessEvent( evt );
 }
 
 void MainEmuFrame::Menu_GSSettings_Click(wxCommandEvent &event)
 {
 	wxCommandEvent evt( pxEvt_SetSettingsPage );
 	evt.SetString( L"GS" );
-	AppOpenDialog<SysConfigDialog>( this )->GetEventHandler()->ProcessEvent( evt );
+	AppOpenDialogByName<pxGUIDialogs::EmulationSettingsDialog>(this)->ProcessWindowEvent(evt);
 }
 
 void MainEmuFrame::Menu_SelectPluginsBios_Click(wxCommandEvent &event)

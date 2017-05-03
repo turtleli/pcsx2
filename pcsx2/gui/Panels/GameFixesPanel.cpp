@@ -178,3 +178,100 @@ void Panels::GameFixesPanel::ApplyConfigToGui( AppConfig& configToApply, int fla
 	
 	this->Enable(!configToApply.EnablePresets);
 }
+
+namespace pxGUIPanels
+{
+GamefixesPanel::GamefixesPanel(wxWindow *parent)
+    : wxPanel(parent)
+{
+    m_manual_gamefixes = new wxCheckBox(this, wxID_ANY, _("Enable manual game fixes [Not recommended]"));
+    m_manual_gamefixes_text = new pxGUI::StaticText(this, wxID_ANY,
+                                                    _("It's better to enable 'Automatic game fixes' at the main menu instead, and leave this page empty. ('Automatic' means: selectively use specific tested fixes for specific games). Manual game fixes will NOT increase your performance. In fact they may decrease it."));
+    wxString manual_gamefixes_tooltip(_("Gamefixes can work around wrong emulation in some titles.\nThey may also cause compatibility or performance issues.\n\nThe safest way is to make sure that all game fixes are completely disabled."));
+    pxSetToolTip(m_manual_gamefixes, manual_gamefixes_tooltip);
+    pxSetToolTip(m_manual_gamefixes_text, manual_gamefixes_tooltip);
+
+    const std::map<GamefixId, std::pair<wxString, wxString>> hack_options{
+        {GamefixId::Fix_VuAddSub, {_("VU Add Hack - Fixes Tri-Ace games boot crash."), _("Games that need this hack to boot:\n * Star Ocean 3\n * Radiata Stories\n * Valkyrie Profile 2")}},
+        {GamefixId::Fix_VuClipFlag, {_("VU Clip Flag Hack - For Persona games (SuperVU recompiler only!)"), ""}},
+        {GamefixId::Fix_FpuCompare, {_("FPU Compare Hack - For Digimon Rumble Arena 2."), ""}},
+        {GamefixId::Fix_FpuMultiply, {_("FPU Multiply Hack - For Tales of Destiny."), ""}},
+        {GamefixId::Fix_FpuNegDiv, {_("FPU Negative Div Hack - For Gundam games."), ""}},
+        {GamefixId::Fix_XGKick, {_("VU XGkick Hack - For Erementar Gerad."), ""}},
+        {GamefixId::Fix_IpuWait, {_("FFX videos fix - Fixes bad graphics overlay in FFX videos."), ""}},
+        {GamefixId::Fix_EETiming, {_("EE timing hack - Multi purpose hack. Try if all else fails."), _("Known to affect following games:\n * Digital Devil Saga (Fixes FMV and crashes)\n * SSX (Fixes bad graphics and crashes)\n * Resident Evil: Dead Aim (Causes garbled textures)")}},
+        {GamefixId::Fix_SkipMpeg, {_("Skip MPEG hack - Skips videos/FMVs in games to avoid game hanging/freezes."), ""}},
+        {GamefixId::Fix_OPHFlag, {_("OPH Flag hack - Try if your game freezes showing the same frame."), _("Known to affect following games:\n * Bleach Blade Battler\n * Growlanser II and III\n * Wizardry")}},
+        {GamefixId::Fix_DMABusy, {_("Ignore DMAC writes when it is busy."), _("Known to affect following games:\n * Mana Khemia 1 (Going \"off campus\")")}},
+        {GamefixId::Fix_VIFFIFO, {_("Simulate VIF1 FIFO read ahead. Fixes slow loading games."), _("Known to affect following games:\n * Test Drive Unlimited\n * Transformers")}},
+        {GamefixId::Fix_VIF1Stall, {_("Delay VIF1 Stalls (VIF1 FIFO) - For SOCOM 2 HUD and Spy Hunter loading hang."), ""}},
+        {GamefixId::Fix_GIFFIFO, {_("Enable the GIF FIFO (slower but needed for Hotwheels, Wallace and Gromit, DJ Hero)"), ""}},
+        {GamefixId::Fix_FMVinSoftware, {_("Switch to GSdx software rendering when an FMV plays"), ""}},
+        {GamefixId::Fix_GoemonTlbMiss, {_("Preload TLB hack to avoid tlb miss on Goemon"), ""}},
+        {GamefixId::Fix_ScarfaceIbit, {_("VU I bit Hack avoid constant recompilation (Scarface The World Is Yours)"), ""}},
+    };
+
+    auto sizer = new wxBoxSizer(wxVERTICAL);
+    auto gamefixes_sizer = new wxStaticBoxSizer(wxVERTICAL, this, _("Gamefixes"));
+
+    m_gamefix_box = gamefixes_sizer->GetStaticBox();
+    m_gamefix_choices = new pxGUI::CheckBoxPanel<GamefixId>(gamefixes_sizer->GetStaticBox(), hack_options);
+    gamefixes_sizer->Add(m_gamefix_choices, wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT));
+
+    sizer->Add(m_manual_gamefixes, wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT | wxTOP));
+    sizer->Add(m_manual_gamefixes_text, wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT | wxBOTTOM));
+    sizer->Add(gamefixes_sizer, wxSizerFlags(1).Expand().Border(wxALL).ReserveSpaceEvenIfHidden());
+
+    SetSizer(sizer);
+
+    Bind(wxEVT_CHECKBOX, &GamefixesPanel::EnableManualGamefixesCheckboxHandler, this, m_manual_gamefixes->GetId());
+
+    Bind(pxEVT_SETTING, &GamefixesPanel::SettingEventHandler, this);
+}
+
+void GamefixesPanel::UpdateGamefixesState(bool presets_enabled)
+{
+    //m_gamefix_choices->Enable(m_manual_gamefixes->IsChecked() && !presets_enabled);
+    m_gamefix_box->Show(m_manual_gamefixes->IsChecked() && !presets_enabled);
+}
+
+void GamefixesPanel::EnableManualGamefixesCheckboxHandler(wxCommandEvent &evt)
+{
+    evt.Skip();
+
+    UpdateGamefixesState();
+}
+
+void GamefixesPanel::ApplyGUIToConfig(AppConfig &config)
+{
+    config.EnableGameFixes = m_manual_gamefixes->IsChecked();
+
+    for (auto &key : m_gamefix_choices->GetKeys())
+        config.EmuOptions.Gamefixes.Set(key, m_gamefix_choices->GetValue(key));
+}
+
+void GamefixesPanel::ApplyConfigToGUI(AppConfig &config)
+{
+    m_manual_gamefixes->SetValue(config.EnableGameFixes);
+
+    for (auto &key : m_gamefix_choices->GetKeys())
+        m_gamefix_choices->SetValue(key, config.EmuOptions.Gamefixes.Get(key));
+
+    m_manual_gamefixes->Enable(!config.EnablePresets);
+    m_manual_gamefixes_text->Enable(!config.EnablePresets);
+
+    UpdateGamefixesState(config.EnablePresets);
+}
+
+void GamefixesPanel::SettingEventHandler(pxSettingEvent &evt)
+{
+    using Action = pxSettingEvent::Action;
+    Action action = evt.GetAction();
+    AppConfig &config = evt.GetConfig();
+    if (action == Action::ApplyGUIToConfig) {
+        ApplyGUIToConfig(config);
+    } else {
+        ApplyConfigToGUI(config);
+    }
+}
+}

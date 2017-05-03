@@ -19,6 +19,10 @@
 #include "ConfigurationPanels.h"
 
 #include <wx/spinctrl.h>
+#include <wx/valnum.h>
+
+#include <array>
+#include <tuple>
 
 using namespace pxSizerFlags;
 
@@ -367,3 +371,227 @@ void Panels::VideoPanel::ApplyConfigToGui( AppConfig& configToApply, int flags )
 	Layout();
 }
 
+namespace pxGUIPanels
+{
+GSPanel::GSPanel(wxWindow *parent)
+    : wxPanel(parent)
+{
+    auto sizer = new wxBoxSizer(wxVERTICAL);
+    SetSizer(sizer);
+
+    auto sizer_flags = wxSizerFlags().Expand().Border(wxALL);
+
+    auto grid_sizer = new wxGridSizer(2);
+    grid_sizer->Add(CreateFrameLimiterBox(), wxSizerFlags().Expand().Border(wxRIGHT));
+    grid_sizer->Add(CreateFrameSkipBox(), wxSizerFlags().Expand().Border(wxLEFT));
+    sizer->Add(grid_sizer, sizer_flags);
+
+    m_sync_mtgs = new wxCheckBox(this, wxID_ANY, _("Use Synchronized MTGS"));
+    m_sync_mtgs_text = new pxGUI::StaticText(this, wxID_ANY, _("For troubleshooting potential bugs in the MTGS only, as it is potentially very slow."));
+
+    sizer->Add(m_sync_mtgs, wxSizerFlags().Expand().Border(wxTOP | wxLEFT | wxRIGHT));
+    sizer->Add(m_sync_mtgs_text, wxSizerFlags().Expand().Border(wxBOTTOM | wxLEFT | wxRIGHT));
+
+    m_disable_gs_output = new wxCheckBox(this, wxID_ANY, _("Disable all GS output"));
+    m_disable_gs_output_text = new pxGUI::StaticText(this, wxID_ANY, _("Completely disables all GS plugin activity; ideal for benchmarking EEcore components."));
+
+    sizer->Add(m_disable_gs_output, wxSizerFlags().Expand().Border(wxTOP | wxLEFT | wxRIGHT).ReserveSpaceEvenIfHidden());
+    sizer->Add(m_disable_gs_output_text, wxSizerFlags().Expand().Border(wxBOTTOM | wxLEFT | wxRIGHT).ReserveSpaceEvenIfHidden());
+
+    // Broken options
+    m_disable_gs_output->Hide();
+    m_disable_gs_output_text->Hide();
+
+    Bind(pxEVT_SETTING, &GSPanel::SettingEventHandler, this);
+}
+
+wxSizer *GSPanel::CreateFrameLimiterBox()
+{
+    auto sizer = new wxStaticBoxSizer(wxVERTICAL, this, _("Framelimiter"));
+    auto parent = sizer->GetStaticBox();
+    auto sizer_flags = wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT);
+    auto left_sizer_flags = wxSizerFlags().Expand().Border(wxTOP | wxBOTTOM | wxRIGHT);
+    auto right_sizer_flags = wxSizerFlags().Expand().Border(wxTOP | wxBOTTOM | wxLEFT);
+
+    m_disable_framelimiter = new wxCheckBox(parent, wxID_ANY, _("Disable Framelimiting"));
+    auto disable_framelimiter_text = new pxGUI::StaticText(parent, wxID_ANY, _("Useful for running benchmarks. Toggle this option in-game by pressing F4."));
+
+    sizer->Add(m_disable_framelimiter, sizer_flags);
+    sizer->Add(disable_framelimiter_text, sizer_flags);
+    sizer->AddSpacer(10);
+
+    // Framerate
+    auto speed_sizer = new wxFlexGridSizer(2);
+    speed_sizer->AddGrowableCol(0);
+
+    m_base_framerate_text = new pxGUI::StaticText(parent, wxID_ANY, _("Base Framerate Adjust (%):"));
+    m_base_framerate = new wxSpinCtrl(parent);
+    m_base_framerate->SetRange(10, 1000);
+    speed_sizer->Add(m_base_framerate_text, left_sizer_flags);
+    speed_sizer->Add(m_base_framerate, right_sizer_flags);
+
+    auto slow_framerate_text = new pxGUI::StaticText(parent, wxID_ANY, _("Slow Motion Adjust (%):"));
+    m_slow_framerate = new wxSpinCtrl(parent);
+    m_slow_framerate->SetRange(1, 1000);
+    speed_sizer->Add(slow_framerate_text, left_sizer_flags);
+    speed_sizer->Add(m_slow_framerate, right_sizer_flags);
+
+    auto turbo_framerate_text = new pxGUI::StaticText(parent, wxID_ANY, _("Turbo Adjust (%):"));
+    m_turbo_framerate = new wxSpinCtrl(parent);
+    m_turbo_framerate->SetRange(10, 1000);
+    speed_sizer->Add(turbo_framerate_text, left_sizer_flags);
+    speed_sizer->Add(m_turbo_framerate, right_sizer_flags);
+
+    sizer->Add(speed_sizer, sizer_flags);
+    sizer->AddSpacer(10);
+
+    // NTSC/PAL
+    auto ntsc_pal_sizer = new wxFlexGridSizer(2);
+    ntsc_pal_sizer->AddGrowableCol(0);
+
+    wxFloatingPointValidator<float> validate(2, nullptr);
+    validate.SetRange(0.05f, 1000.0f);
+
+    m_ntsc_framerate_text = new pxGUI::StaticText(parent, wxID_ANY, _("NTSC Framerate (FPS):"));
+    m_ntsc_framerate = new wxTextCtrl(parent, wxID_ANY, "59.94", wxDefaultPosition, wxDefaultSize, wxTE_RIGHT, validate);
+    ntsc_pal_sizer->Add(m_ntsc_framerate_text, left_sizer_flags);
+    ntsc_pal_sizer->Add(m_ntsc_framerate, right_sizer_flags);
+
+    m_pal_framerate_text = new pxGUI::StaticText(parent, wxID_ANY, _("PAL Framerate (FPS):"));
+    m_pal_framerate = new wxTextCtrl(parent, wxID_ANY, "50.00", wxDefaultPosition, wxDefaultSize, wxTE_RIGHT, validate);
+    ntsc_pal_sizer->Add(m_pal_framerate_text, left_sizer_flags);
+    ntsc_pal_sizer->Add(m_pal_framerate, right_sizer_flags);
+
+    sizer->Add(ntsc_pal_sizer, sizer_flags);
+
+    return sizer;
+}
+
+wxSizer *GSPanel::CreateFrameSkipBox()
+{
+    const std::map<FrameSkip, std::pair<wxString, wxString>> frame_skip_options{
+        {FrameSkip::Disabled, {_("Disabled [default]"), ""}},
+        {FrameSkip::SkipOnTurbo, {_("Skip when on Turbo only (TAB to enable)"), ""}},
+        {FrameSkip::SkipConstantly, {_("Constant skipping"), _("Normal and Turbo limit rates skip frames.  Slow motion mode will still disable frameskipping.")}},
+    };
+
+    auto sizer = new wxStaticBoxSizer(wxVERTICAL, this, _("Frame Skipping"));
+    auto parent = sizer->GetStaticBox();
+    m_frameskipping_box = parent;
+    auto sizer_flags = wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT);
+    auto left_sizer_flags = wxSizerFlags().Expand().Border(wxTOP | wxBOTTOM | wxRIGHT);
+    auto right_sizer_flags = wxSizerFlags().Expand().Border(wxTOP | wxBOTTOM | wxLEFT);
+
+    m_frame_skip_choices = new pxGUI::RadioPanel<FrameSkip>(parent, frame_skip_options, FrameSkip::Disabled);
+
+    sizer->Add(m_frame_skip_choices, sizer_flags);
+    sizer->AddSpacer(10);
+
+    auto constant_skip_sizer = new wxFlexGridSizer(2);
+    constant_skip_sizer->AddGrowableCol(0);
+
+    m_frames_to_draw_text = new pxGUI::StaticText(parent, wxID_ANY, _("Frames to Draw:"));
+    m_frames_to_draw = new wxSpinCtrl(parent);
+    m_frames_to_draw->SetRange(0, 10);
+    constant_skip_sizer->Add(m_frames_to_draw_text, left_sizer_flags);
+    constant_skip_sizer->Add(m_frames_to_draw, right_sizer_flags);
+
+    m_frames_to_skip_text = new pxGUI::StaticText(parent, wxID_ANY, _("Frames to Skip:"));
+    m_frames_to_skip = new wxSpinCtrl(parent);
+    m_frames_to_skip->SetRange(0, 10);
+    constant_skip_sizer->Add(m_frames_to_skip_text, left_sizer_flags);
+    constant_skip_sizer->Add(m_frames_to_skip, right_sizer_flags);
+
+    sizer->Add(constant_skip_sizer, sizer_flags);
+    sizer->AddSpacer(10);
+
+    auto notice = new pxGUI::StaticText(parent, wxID_ANY, _("Notice: Due to PS2 hardware design, precise frame skipping is impossible. Enabling it will cause severe graphical errors in some games."), wxALIGN_CENTER_HORIZONTAL);
+    sizer->Add(notice, sizer_flags);
+
+    return sizer;
+}
+
+void GSPanel::ApplyGUIToConfig(AppConfig &config)
+{
+    config.EmuOptions.GS.FrameLimitEnable = !m_disable_framelimiter->IsChecked();
+    config.Framerate.NominalScalar.SetRaw(m_base_framerate->GetValue());
+    config.Framerate.SlomoScalar.SetRaw(m_slow_framerate->GetValue());
+    config.Framerate.TurboScalar.SetRaw(m_turbo_framerate->GetValue());
+    config.EmuOptions.GS.FramerateNTSC.FromString(m_ntsc_framerate->GetValue());
+    config.EmuOptions.GS.FrameratePAL.FromString(m_pal_framerate->GetValue());
+
+    auto frameskip_choice = m_frame_skip_choices->GetValue();
+    config.Framerate.SkipOnLimit = frameskip_choice == FrameSkip::SkipConstantly;
+    config.Framerate.SkipOnTurbo = frameskip_choice == FrameSkip::SkipOnTurbo;
+
+    config.EmuOptions.GS.FramesToDraw = m_frames_to_draw->GetValue();
+    config.EmuOptions.GS.FramesToSkip = m_frames_to_skip->GetValue();
+
+    config.EmuOptions.GS.SynchronousMTGS = m_sync_mtgs->GetValue();
+    config.EmuOptions.GS.DisableOutput = m_disable_gs_output->GetValue();
+}
+
+void GSPanel::ApplyConfigToGUI(AppConfig &config, bool apply_from_preset)
+{
+    // Framelimiting
+    if (!apply_from_preset)
+        m_disable_framelimiter->SetValue(!config.EmuOptions.GS.FrameLimitEnable);
+    m_base_framerate->SetValue(config.Framerate.NominalScalar.Raw);
+    if (!apply_from_preset) {
+        m_slow_framerate->SetValue(config.Framerate.SlomoScalar.Raw);
+        m_turbo_framerate->SetValue(config.Framerate.TurboScalar.Raw);
+    }
+    m_ntsc_framerate->SetValue(config.EmuOptions.GS.FramerateNTSC.ToString());
+    m_pal_framerate->SetValue(config.EmuOptions.GS.FrameratePAL.ToString());
+
+    m_base_framerate_text->Enable(!config.EnablePresets);
+    m_base_framerate->Enable(!config.EnablePresets);
+#if PCSX2_DEVBUILD
+    m_ntsc_framerate_text->Enable(!config.EnablePresets);
+    m_ntsc_framerate->Enable(!config.EnablePresets);
+    m_pal_framerate_text->Enable(!config.EnablePresets);
+    m_pal_framerate->Enable(!config.EnablePresets);
+#else
+    m_ntsc_framerate_text->Enable(0);
+    m_ntsc_framerate->Enable(0);
+    m_pal_framerate_text->Enable(0);
+    m_pal_framerate->Enable(0);
+#endif
+
+    // Frameskipping
+    if (config.Framerate.SkipOnLimit)
+        m_frame_skip_choices->SetValue(FrameSkip::SkipConstantly);
+    else if (config.Framerate.SkipOnTurbo)
+        m_frame_skip_choices->SetValue(FrameSkip::SkipOnTurbo);
+    else
+        m_frame_skip_choices->SetValue(FrameSkip::Disabled);
+
+    m_frameskipping_box->Enable(!config.EnablePresets);
+
+    m_frames_to_draw->SetValue(config.EmuOptions.GS.FramesToDraw);
+    m_frames_to_skip->SetValue(config.EmuOptions.GS.FramesToSkip);
+
+    // Misc
+    m_sync_mtgs->SetValue(config.EmuOptions.GS.SynchronousMTGS);
+    m_disable_gs_output->SetValue(config.EmuOptions.GS.DisableOutput);
+
+    m_sync_mtgs->Enable(!config.EnablePresets);
+    m_sync_mtgs_text->Enable(!config.EnablePresets);
+
+    m_disable_gs_output->Enable(!config.EnablePresets);
+    m_disable_gs_output_text->Enable(!config.EnablePresets);
+}
+
+void GSPanel::SettingEventHandler(pxSettingEvent &evt)
+{
+    using Action = pxSettingEvent::Action;
+    Action action = evt.GetAction();
+    AppConfig &config = evt.GetConfig();
+    if (action == Action::ApplyGUIToConfig) {
+        ApplyGUIToConfig(config);
+    } else {
+        bool apply_from_preset = action == Action::ApplyPresetToGUI;
+        ApplyConfigToGUI(config, apply_from_preset);
+    }
+}
+}

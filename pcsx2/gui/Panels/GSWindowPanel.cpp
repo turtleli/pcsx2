@@ -16,6 +16,9 @@
 #include "PrecompiledHeader.h"
 #include "ConfigurationPanels.h"
 
+#include <wx/valnum.h>
+#include <array>
+
 using namespace pxSizerFlags;
 
 // --------------------------------------------------------------------------------------
@@ -171,4 +174,133 @@ void Panels::GSWindowSettingsPanel::Apply()
 
 	appconf.WindowSize.x	= xr;
 	appconf.WindowSize.y	= yr;
+}
+
+namespace pxGUIPanels
+{
+GSWindowPanel::GSWindowPanel(wxWindow *parent)
+    : wxPanel(parent)
+{
+    auto sizer = new wxBoxSizer(wxVERTICAL);
+    SetSizer(sizer);
+
+    auto sizer_flags = wxSizerFlags().Border(wxALL);
+    auto top_sizer_flags = wxSizerFlags().Border(wxLEFT | wxTOP | wxRIGHT);
+    auto bottom_sizer_flags = wxSizerFlags().Border(wxLEFT | wxBOTTOM | wxRIGHT);
+
+    std::array<wxString, 3> aspect_ratio_choices{
+        _("Fit to Window/Screen"),
+        _("Standard (4:3)"),
+        _("Widescreen (16:9)"),
+    };
+
+    // Make an enum friendly wxChoice wrapper?
+    auto aspect_ratio_text = new pxGUI::StaticText(this, wxID_ANY, _("Aspect Ratio:"));
+    m_aspect_ratio = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+                                  aspect_ratio_choices.size(), aspect_ratio_choices.data());
+
+    sizer->Add(aspect_ratio_text, top_sizer_flags);
+    sizer->Add(m_aspect_ratio, bottom_sizer_flags);
+
+    // Maybe these shouold be wxSpinCtrl instead?????
+    wxIntegerValidator<int> resolution_validator;
+    resolution_validator.SetMin(5);
+
+    auto window_size_text = new pxGUI::StaticText(this, wxID_ANY, _("Custom Window Size:"));
+    m_window_width = new wxTextCtrl(this, wxID_ANY, "640", wxDefaultPosition, wxDefaultSize, wxTE_RIGHT, resolution_validator);
+    auto x_text = new pxGUI::StaticText(this, wxID_ANY, "x", wxALIGN_CENTRE_HORIZONTAL);
+    m_window_height = new wxTextCtrl(this, wxID_ANY, "480", wxDefaultPosition, wxDefaultSize, wxTE_RIGHT, resolution_validator);
+
+    auto resolution_sizer = new wxBoxSizer(wxHORIZONTAL);
+    resolution_sizer->Add(m_window_width, wxSizerFlags().Expand());
+    resolution_sizer->Add(x_text, wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT));
+    resolution_sizer->Add(m_window_height, wxSizerFlags().Expand());
+
+    sizer->Add(window_size_text, top_sizer_flags);
+    sizer->Add(resolution_sizer, bottom_sizer_flags);
+
+    wxFloatingPointValidator<float> zoom_validator(2);
+    zoom_validator.SetRange(0.05f, 200.0f);
+
+    auto zoom_text = new pxGUI::StaticText(this, wxID_ANY, _("Zoom:"));
+    m_zoom = new wxTextCtrl(this, wxID_ANY, "100.00", wxDefaultPosition, wxDefaultSize, wxTE_RIGHT, zoom_validator);
+
+    sizer->Add(zoom_text, top_sizer_flags);
+    sizer->Add(m_zoom, bottom_sizer_flags);
+
+    m_disable_resize_checkbox = new wxCheckBox(this, wxID_ANY, _("Disable window resize border"));
+    m_hide_mouse_checkbox = new wxCheckBox(this, wxID_ANY, _("Always hide mouse cursor"));
+    m_hide_window_checkbox = new wxCheckBox(this, wxID_ANY, _("Hide window when paused"));
+    m_default_fullscreen_checkbox = new wxCheckBox(this, wxID_ANY, _("Default to fullscreen mode on open"));
+    m_double_click_fullscreen_checkbox = new wxCheckBox(this, wxID_ANY, _("Double-click toggles fullscreen mode"));
+    m_switch_aspect_ratio_checkbox = new wxCheckBox(this, wxID_ANY, _("Switch to 4:3 aspect ratio when an FMV plays"));
+    m_vsync_refresh_checkbox = new wxCheckBox(this, wxID_ANY, _("Wait for VSync on refresh"));
+
+    sizer->Add(m_disable_resize_checkbox, sizer_flags);
+    sizer->Add(m_hide_mouse_checkbox, sizer_flags);
+    sizer->Add(m_hide_window_checkbox, sizer_flags);
+    sizer->Add(m_default_fullscreen_checkbox, sizer_flags);
+    sizer->Add(m_double_click_fullscreen_checkbox, sizer_flags);
+    sizer->Add(m_switch_aspect_ratio_checkbox, sizer_flags);
+    sizer->Add(m_vsync_refresh_checkbox, sizer_flags);
+
+    Bind(pxEVT_SETTING, &GSWindowPanel::SettingEventHandler, this);
+}
+
+void GSWindowPanel::ApplyGUIToConfig(AppConfig &config)
+{
+    config.GSWindow.AspectRatio = static_cast<AspectRatioType>(m_aspect_ratio->GetSelection());
+
+    // Really should be wxSpinCtrl???
+    long width;
+    long height;
+    m_window_width->GetValue().ToLong(&width);
+    m_window_height->GetValue().ToLong(&height);
+    config.GSWindow.WindowSize.Set(width, height);
+
+    config.GSWindow.Zoom.FromString(m_zoom->GetValue());
+
+    config.GSWindow.DisableResizeBorders = m_disable_resize_checkbox->IsChecked();
+    config.GSWindow.AlwaysHideMouse = m_hide_mouse_checkbox->IsChecked();
+    config.GSWindow.CloseOnEsc = m_hide_window_checkbox->IsChecked();
+    config.GSWindow.DefaultToFullscreen = m_default_fullscreen_checkbox->IsChecked();
+    config.GSWindow.IsToggleFullscreenOnDoubleClick = m_double_click_fullscreen_checkbox->IsChecked();
+    config.GSWindow.IsToggleAspectRatioSwitch = m_switch_aspect_ratio_checkbox->IsChecked();
+    config.EmuOptions.GS.VsyncEnable = m_vsync_refresh_checkbox->IsChecked();
+}
+
+void GSWindowPanel::ApplyConfigToGUI(AppConfig &config, bool apply_from_preset)
+{
+    if (!apply_from_preset) {
+        m_aspect_ratio->SetSelection(static_cast<int>(config.GSWindow.AspectRatio));
+
+        wxSize window_size = config.GSWindow.WindowSize;
+        m_window_width->SetValue(wxString::Format("%d", window_size.GetWidth()));
+        m_window_height->SetValue(wxString::Format("%d", window_size.GetHeight()));
+
+        m_zoom->SetValue(config.GSWindow.Zoom.ToString());
+
+        m_disable_resize_checkbox->SetValue(config.GSWindow.DisableResizeBorders);
+        m_hide_mouse_checkbox->SetValue(config.GSWindow.AlwaysHideMouse);
+        m_hide_window_checkbox->SetValue(config.GSWindow.CloseOnEsc);
+        m_default_fullscreen_checkbox->SetValue(config.GSWindow.DefaultToFullscreen);
+        m_double_click_fullscreen_checkbox->SetValue(config.GSWindow.IsToggleFullscreenOnDoubleClick);
+        m_switch_aspect_ratio_checkbox->SetValue(config.GSWindow.IsToggleAspectRatioSwitch);
+    }
+    m_vsync_refresh_checkbox->SetValue(config.EmuOptions.GS.VsyncEnable);
+    m_vsync_refresh_checkbox->Enable(!config.EnablePresets);
+}
+
+void GSWindowPanel::SettingEventHandler(pxSettingEvent &evt)
+{
+    using Action = pxSettingEvent::Action;
+    Action action = evt.GetAction();
+    AppConfig &config = evt.GetConfig();
+    if (action == Action::ApplyGUIToConfig) {
+        ApplyGUIToConfig(config);
+    } else {
+        bool apply_from_preset = action == Action::ApplyPresetToGUI;
+        ApplyConfigToGUI(config, apply_from_preset);
+    }
+}
 }

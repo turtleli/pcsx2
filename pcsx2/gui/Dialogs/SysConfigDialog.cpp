@@ -23,6 +23,13 @@
 #include "Panels/ConfigurationPanels.h"
 #include "MainFrame.h"
 
+#include "Utilities/IniInterface.h"
+
+#include <wx/notebook.h>
+#include <wx/spinctrl.h>
+
+#include <array>
+
 using namespace Panels;
 using namespace pxSizerFlags;
 
@@ -272,3 +279,304 @@ Dialogs::InterfaceLanguageDialog::InterfaceLanguageDialog(wxWindow* parent)
 }
 
 bool g_ConfigPanelChanged = false;
+
+wxDEFINE_EVENT(pxEVT_SETTING, pxSettingEvent);
+
+pxSettingEvent::pxSettingEvent(int id, wxEventType event_type, AppConfig &config, Action action)
+    : wxEvent(id, event_type)
+    , m_config(config)
+    , m_action(action)
+{
+}
+
+wxEvent *pxSettingEvent::Clone() const
+{
+    return new pxSettingEvent(*this);
+}
+
+AppConfig &pxSettingEvent::GetConfig() const
+{
+    return m_config;
+}
+
+pxSettingEvent::Action pxSettingEvent::GetAction() const
+{
+    return m_action;
+}
+
+namespace pxGUIDialogs
+{
+BaseNotebookConfigDialog::BaseNotebookConfigDialog(wxWindow *parent, const wxString &label)
+    : wxDialog(parent, wxID_ANY, wxGetTranslation(label), wxDefaultPosition, wxDefaultSize, wxRESIZE_BORDER | wxDEFAULT_DIALOG_STYLE, label)
+{
+}
+
+template <typename T>
+void BaseNotebookConfigDialog::AddBookPage(const wxString &label)
+{
+    m_notebook->AddPage(new T(m_notebook), wxGetTranslation(label));
+    m_pages.emplace_back(label);
+}
+
+
+const wxString EmulationSettingsDialog::GetDialogName()
+{
+    return pxL("Emulation Settings");
+}
+
+EmulationSettingsDialog::EmulationSettingsDialog(wxWindow *parent)
+    : BaseNotebookConfigDialog(parent, GetDialogName())
+{
+    auto sizer = new wxFlexGridSizer(1);
+    sizer->AddGrowableRow(0);
+    sizer->AddGrowableCol(0);
+
+    m_notebook = new wxNotebook(this, wxID_ANY);
+    // This is what actually controls the minimum dialog size
+    m_notebook->SetMinSize(wxSize(600, 450));
+
+    AddBookPage<pxGUIPanels::EEIOPPanel>(pxL("EE/IOP"));
+    AddBookPage<pxGUIPanels::VUPanel>(pxL("VUs"));
+    AddBookPage<pxGUIPanels::GSPanel>(pxL("GS"));
+    AddBookPage<pxGUIPanels::GSWindowPanel>(pxL("GS Window"));
+    AddBookPage<pxGUIPanels::SpeedhacksPanel>(pxL("Speedhacks"));
+    AddBookPage<pxGUIPanels::GamefixesPanel>(pxL("Game Fixes"));
+
+    auto bottom_sizer = new wxFlexGridSizer(2);
+    bottom_sizer->AddGrowableCol(0);
+    auto spare_sizer = new wxBoxSizer(wxHORIZONTAL);
+
+    const std::array<wxString, 6> preset_choices{
+        _("Safest"),
+        _("Safe (faster)"),
+        _("Balanced"),
+        _("Aggressive"),
+        _("Aggressive plus"),
+        _("Mostly Harmful"),
+    };
+
+    m_preset_checkbox = new wxCheckBox(this, wxID_ANY, _("Preset:"));
+    m_preset_choices = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, preset_choices.size(), preset_choices.data());
+    const int preset_index = std::max(0, std::min(g_Conf->PresetIndex, AppConfig::GetMaxPresetIndex()));
+    m_preset_choices->SetSelection(preset_index);
+    m_preset_checkbox->SetValue(g_Conf->EnablePresets);
+
+    // Move into base class
+    m_standard_button_sizer = new wxStdDialogButtonSizer();
+
+    m_standard_button_sizer->AddButton(new wxButton(this, wxID_APPLY));
+    m_standard_button_sizer->AddButton(new wxButton(this, wxID_OK));
+    m_standard_button_sizer->AddButton(new wxButton(this, wxID_CANCEL));
+    m_standard_button_sizer->Realize();
+
+    // Need to consider common sizers
+    spare_sizer->Add(m_preset_checkbox, wxSizerFlags().Align(wxALIGN_CENTRE_VERTICAL).Border(wxLEFT | wxRIGHT));
+    spare_sizer->Add(m_preset_choices, wxSizerFlags().Align(wxALIGN_CENTRE_VERTICAL).Border(wxLEFT | wxRIGHT));
+
+    bottom_sizer->Add(spare_sizer, wxSizerFlags().Expand().Left().Border(wxLEFT | wxRIGHT));
+    bottom_sizer->Add(m_standard_button_sizer, wxSizerFlags().Right().Border(wxLEFT | wxRIGHT));
+
+    sizer->Add(m_notebook, wxSizerFlags().Expand().Border(wxALL));
+    sizer->Add(bottom_sizer, wxSizerFlags().Expand().Border(wxALL));
+
+    // Move into base class
+    Bind(wxEVT_BUTTON, &EmulationSettingsDialog::CommandEventHandler, this, wxID_DEFAULT);
+    Bind(wxEVT_CHECKBOX, &EmulationSettingsDialog::CommandEventHandler, this);
+    Bind(wxEVT_CHECKLISTBOX, &EmulationSettingsDialog::CommandEventHandler, this);
+    Bind(wxEVT_CHOICE, &EmulationSettingsDialog::CommandEventHandler, this);
+    Bind(wxEVT_RADIOBUTTON, &EmulationSettingsDialog::CommandEventHandler, this);
+    Bind(wxEVT_SLIDER, &EmulationSettingsDialog::CommandEventHandler, this);
+    Bind(wxEVT_SPINCTRL, &EmulationSettingsDialog::CommandEventHandler, this);
+    Bind(wxEVT_TEXT, &EmulationSettingsDialog::CommandEventHandler, this);
+    Bind(wxEVT_TEXT_ENTER, &EmulationSettingsDialog::CommandEventHandler, this);
+    Bind(pxEvt_SetSettingsPage, &EmulationSettingsDialog::SettingsPageHandler, this);
+
+    Bind(wxEVT_CHECKBOX, &EmulationSettingsDialog::PresetHandler, this, m_preset_checkbox->GetId());
+    Bind(wxEVT_CHOICE, &EmulationSettingsDialog::PresetHandler, this, m_preset_choices->GetId());
+    Bind(wxEVT_BUTTON, &EmulationSettingsDialog::ApplyHandler, this, wxID_OK);
+    Bind(wxEVT_BUTTON, &EmulationSettingsDialog::ApplyHandler, this, wxID_APPLY);
+    Bind(wxEVT_BUTTON, &EmulationSettingsDialog::DefaultsHandler, this, wxID_DEFAULT);
+
+    pxSettingEvent setting_event(GetId(), pxEVT_SETTING, *g_Conf,
+                                 pxSettingEvent::Action::ApplyConfigToGUI);
+    for (size_t n = 0; n < m_notebook->GetPageCount(); ++n)
+        m_notebook->GetPage(n)->ProcessWindowEvent(setting_event);
+
+    UpdateState();
+    SetSizerAndFit(sizer);
+
+    if (wxConfigBase *cfg = wxConfigBase::Get(false)) {
+        wxRect screenRect(GetScreenRect());
+
+        IniLoader loader(cfg);
+        ScopedIniGroup group(loader, L"DialogPositions");
+        cfg->SetRecordDefaults(false);
+
+        if (GetWindowStyle() & wxRESIZE_BORDER) {
+            wxSize size;
+            loader.Entry("eny_Size", size, screenRect.GetSize());
+            SetSize(size);
+        }
+
+        if (cfg->Exists("eny_Pos")) {
+            wxPoint pos;
+            loader.Entry("eny_Pos", pos, screenRect.GetPosition());
+            SetPosition(pos);
+        }
+        cfg->SetRecordDefaults(true);
+    }
+
+    if (auto apply = FindWindow(wxID_APPLY))
+        apply->Disable();
+}
+
+EmulationSettingsDialog::~EmulationSettingsDialog()
+{
+    RememberSizeHandler();
+}
+
+void EmulationSettingsDialog::ApplyPresetsToGUI()
+{
+    const bool presets_enabled = m_preset_checkbox->IsChecked();
+    const int preset_index = m_preset_choices->GetSelection();
+
+    AppConfig preset = *g_Conf;
+    preset.IsOkApplyPreset(preset_index);
+    preset.EnablePresets = presets_enabled;
+
+    UpdateState();
+
+    pxSettingEvent setting_event(GetId(), pxEVT_SETTING, preset,
+                                 pxSettingEvent::Action::ApplyPresetToGUI);
+    for (size_t n = 0; n < m_notebook->GetPageCount(); ++n)
+        m_notebook->GetPage(n)->ProcessWindowEvent(setting_event);
+}
+
+void EmulationSettingsDialog::UpdateState()
+{
+    m_preset_choices->Enable(m_preset_checkbox->IsChecked());
+}
+
+void EmulationSettingsDialog::SettingsPageHandler(wxCommandEvent &evt)
+{
+    for (size_t n = 0; n < m_pages.size(); ++n) {
+        if (m_pages[n] == evt.GetString())
+            m_notebook->SetSelection(n);
+    }
+}
+
+void EmulationSettingsDialog::ApplyHandler(wxCommandEvent &evt)
+{
+    evt.Skip();
+
+    // If nothing has changed then there's no point applying the settings again.
+    if (auto apply = FindWindow(wxID_APPLY)) {
+        if (!apply->IsEnabled())
+            return;
+        apply->Disable();
+    }
+
+    g_Conf->EnablePresets = m_preset_checkbox->IsChecked();
+    g_Conf->PresetIndex = m_preset_choices->GetSelection();
+
+    if (g_Conf->EnablePresets) {
+        g_Conf->IsOkApplyPreset(g_Conf->PresetIndex);
+    }
+    // Kinda overlapping if presets are enabled. Oh well.
+    pxSettingEvent setting_event(GetId(), pxEVT_SETTING, *g_Conf,
+                                 pxSettingEvent::Action::ApplyGUIToConfig);
+    for (size_t n = 0; n < m_notebook->GetPageCount(); ++n)
+        m_notebook->GetPage(n)->ProcessWindowEvent(setting_event);
+
+    AppApplySettings();
+    AppSaveSettings();
+}
+
+void EmulationSettingsDialog::PresetHandler(wxCommandEvent &evt)
+{
+    evt.Skip();
+
+    ApplyPresetsToGUI();
+}
+
+void EmulationSettingsDialog::CommandEventHandler(wxCommandEvent &evt)
+{
+    evt.Skip();
+
+    if (auto apply = FindWindow(wxID_APPLY)) {
+        apply->Enable();
+    }
+}
+
+void EmulationSettingsDialog::DefaultsHandler(wxCommandEvent &evt)
+{
+    evt.Skip();
+
+    AppConfig default_config;
+    default_config.EnablePresets = false;
+
+    pxSettingEvent setting_event(GetId(), pxEVT_SETTING, default_config,
+                                 pxSettingEvent::Action::ApplyDefaultsToGUI);
+    m_notebook->GetCurrentPage()->ProcessWindowEvent(setting_event);
+}
+
+void EmulationSettingsDialog::RememberSizeHandler()
+{
+    wxConfigBase *cfg = wxConfigBase::Get(false);
+    if (cfg == nullptr)
+        return;
+
+    const wxRect screenRect(GetScreenRect());
+    wxPoint pos(screenRect.GetPosition());
+    IniSaver saver(cfg);
+    ScopedIniGroup group(saver, L"DialogPositions");
+
+    if (GetWindowStyle() & wxRESIZE_BORDER) {
+        wxSize size(screenRect.GetSize());
+        saver.Entry("eny_Size", size, screenRect.GetSize());
+    }
+    saver.Entry("eny_Pos", pos, screenRect.GetPosition());
+}
+
+const wxString ComponentsDialog::GetDialogName()
+{
+    return pxL("Components Selector");
+}
+
+ComponentsDialog::ComponentsDialog(wxWindow *parent)
+    : BaseNotebookConfigDialog(parent, GetDialogName())
+{
+    auto sizer = new wxFlexGridSizer(1);
+    sizer->AddGrowableRow(0);
+    sizer->AddGrowableCol(0);
+
+    m_notebook = new wxNotebook(this, wxID_ANY);
+    // This is what actually controls the minimum dialog size
+    m_notebook->SetMinSize(wxSize(800, 450));
+
+    AddBookPage<pxGUIPanels::PluginSelectorPanel>(pxL("Plugins"));
+    AddBookPage<pxGUIPanels::BIOSSelectorPanel>(pxL("BIOS"));
+
+    auto standard_button_sizer = new wxStdDialogButtonSizer();
+
+    standard_button_sizer->AddButton(new wxButton(this, wxID_APPLY));
+    standard_button_sizer->AddButton(new wxButton(this, wxID_OK));
+    standard_button_sizer->AddButton(new wxButton(this, wxID_CANCEL));
+    standard_button_sizer->Realize();
+
+    sizer->Add(m_notebook, wxSizerFlags().Expand());
+    sizer->Add(standard_button_sizer, wxSizerFlags().Right());
+
+    SetSizerAndFit(sizer);
+
+    Bind(pxEvt_SetSettingsPage, &ComponentsDialog::SettingsPageHandler, this);
+}
+
+void ComponentsDialog::SettingsPageHandler(wxCommandEvent &evt)
+{
+    for (size_t n = 0; n < m_pages.size(); ++n) {
+        if (m_pages[n] == evt.GetString())
+            m_notebook->SetSelection(n);
+    }
+}
+}
