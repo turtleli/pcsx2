@@ -3,6 +3,8 @@
 # finished, which could be a bit annoying.
 version: 1.{build}-{branch}
 
+clone_depth: 5
+
 environment:
   matrix:
   - platform: Win32
@@ -23,8 +25,9 @@ build_script:
   - msbuild buildbot.xml /m /t:%target% /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 
 after_build:
-  - ps: $env:gitrev = git describe --tags
-  - ps: $env:my_version = "$env:gitrev-$env:appveyor_build_number"
+  - ps: $env:gitrev = $env:appveyor_repo_commit.substring(0,10)
+  - ps: if (Test-Path Env:\APPVEYOR_PULL_REQUEST_NUMBER) {$env:gitrev = "PR${env:appveyor_pull_request_number}-${env:gitrev}"}
+  - ps: $env:my_version = "${env:gitrev}-${env:appveyor_build_number}"
   - type NUL > bin\portable.ini
   - set folder_name=pcsx2-%my_version%-%visualstudio_string%-%platform%-%target%
   - rename bin %folder_name%
