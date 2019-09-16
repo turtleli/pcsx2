@@ -1,0 +1,6 @@
+Gettext is GPL3+ licensed.
+
+The msgfmt binary was extracted from the gettext 0.20.1 + iconv 1.16 static
+32-bit zip file at https://github.com/mlocati/gettext-iconv-windows (the release
+corresponding to commit 0211fe17fdc52e4d5ae62c3a892ffe20af42aa40).
+

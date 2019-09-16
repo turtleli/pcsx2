@@ -83,6 +83,7 @@ oprofile_data/
 /deps
 /ipch
 
+!/3rdparty/gettext/msgfmt.exe
 !/3rdparty/libjpeg/change.log
 /3rdparty/portaudio/portaudio-2.0.pc
 /3rdparty/portaudio/bin
