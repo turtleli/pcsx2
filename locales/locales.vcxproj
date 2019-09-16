@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{938299EF-930B-4052-93B0-CFF7613D025A}</ProjectGuid>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="ar_SA\pcsx2_Iconized.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="ar_SA\pcsx2_Main.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="ca_ES\pcsx2_Iconized.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="ca_ES\pcsx2_Main.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="cs_CZ\pcsx2_Iconized.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="cs_CZ\pcsx2_Main.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="da_DK\pcsx2_Iconized.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="da_DK\pcsx2_Main.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="de_DE\pcsx2_Iconized.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="de_DE\pcsx2_Main.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="es_ES\pcsx2_Iconized.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="es_ES\pcsx2_Main.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="fi_FI\pcsx2_Iconized.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="fi_FI\pcsx2_Main.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="fr_FR\pcsx2_Iconized.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="fr_FR\pcsx2_Main.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="hr_HR\pcsx2_Iconized.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="hr_HR\pcsx2_Main.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="hu_HU\pcsx2_Iconized.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="hu_HU\pcsx2_Main.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="id_ID\pcsx2_Iconized.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="id_ID\pcsx2_Main.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="it_IT\pcsx2_Iconized.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="it_IT\pcsx2_Main.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="ja_JP\pcsx2_Iconized.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="ja_JP\pcsx2_Main.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="ko_KR\pcsx2_Iconized.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="ko_KR\pcsx2_Main.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="ms_MY\pcsx2_Iconized.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="ms_MY\pcsx2_Main.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="nb_NO\pcsx2_Iconized.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="nb_NO\pcsx2_Main.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="pl_PL\pcsx2_Iconized.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="pl_PL\pcsx2_Main.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="pt_BR\pcsx2_Iconized.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="pt_BR\pcsx2_Main.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="ru_RU\pcsx2_Iconized.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="ru_RU\pcsx2_Main.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="sv_SE\pcsx2_Iconized.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="sv_SE\pcsx2_Main.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="th_TH\pcsx2_Iconized.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="th_TH\pcsx2_Main.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="tr_TR\pcsx2_Iconized.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="tr_TR\pcsx2_Main.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="zh_CN\pcsx2_Iconized.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="zh_CN\pcsx2_Main.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="zh_TW\pcsx2_Iconized.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="zh_TW\pcsx2_Main.po">
+      <Command>..\3rdparty\gettext\msgfmt.exe %(Identity) -o ..\bin\Langs\%(RelativeDir)%(FileName).mo</Command>
+      <Outputs>..\bin\Langs\%(RelativeDir)%(FileName).mo</Outputs>
+    </CustomBuild>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

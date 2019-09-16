@@ -1,0 +1,223 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="ar_SA">
+      <UniqueIdentifier>{248a82ab-7c09-4b6e-b831-2665d6ed24c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ca_ES">
+      <UniqueIdentifier>{c9d50ae3-809b-435b-bdfe-f64c6e287289}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cs_CZ">
+      <UniqueIdentifier>{ade13861-6242-4258-accf-60625bba1019}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="da_DK">
+      <UniqueIdentifier>{650eb19e-53a5-41ee-962c-a1885550abfe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="de_DE">
+      <UniqueIdentifier>{6026e525-a0b6-4896-b505-e58d89066dbf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="es_ES">
+      <UniqueIdentifier>{fb1b5bd3-7d5a-4713-8689-c4d18714ad90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="fi_FI">
+      <UniqueIdentifier>{c0f65d36-033c-4696-b494-a8af7670bc0b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="fr_FR">
+      <UniqueIdentifier>{60d744be-be4b-44cd-b987-51701b4c57cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="hr_HR">
+      <UniqueIdentifier>{135368a2-7ac4-4dda-aab3-56eb5b8f1b32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="hu_HU">
+      <UniqueIdentifier>{9f3308cf-d819-4773-bec9-1d0f51b2588f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="id_ID">
+      <UniqueIdentifier>{51c39996-e0f1-4097-ad09-30f82a4ec8bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="it_IT">
+      <UniqueIdentifier>{0a8645e2-ae03-44a5-a622-c5afc54d6a70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ja_JP">
+      <UniqueIdentifier>{2813176e-0dcc-41a5-b907-49a9c1f54ba1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ko_KR">
+      <UniqueIdentifier>{04deec9c-e3e6-4e49-b9ac-b1f67abf30ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ms_MY">
+      <UniqueIdentifier>{8704bb18-5fb7-4252-804d-38673f710685}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="nb_NO">
+      <UniqueIdentifier>{c9ed8677-b261-4a62-81de-31eb7a30557f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pl_PL">
+      <UniqueIdentifier>{a312b803-4f3c-44a7-b0dc-3585a67c07e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pt_BR">
+      <UniqueIdentifier>{00eb420c-65a2-45c0-94be-a94fd0b3d5b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ru_RU">
+      <UniqueIdentifier>{412700a0-826c-425a-b756-2ae602621044}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sv_SE">
+      <UniqueIdentifier>{94df6587-9056-469e-9fa4-d97835f05318}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="th_TH">
+      <UniqueIdentifier>{35c108cc-aa45-49b1-87dc-dc03859172e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tr_TR">
+      <UniqueIdentifier>{89612ca2-cc46-4cae-aff4-00c1ffb8e332}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="zh_CN">
+      <UniqueIdentifier>{4946b342-dc75-4ede-8982-250f0179be36}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="zh_TW">
+      <UniqueIdentifier>{5f91eb27-7db9-49ad-93d7-f83cd9dd13fd}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ar_SA\pcsx2_Iconized.po">
+      <Filter>ar_SA</Filter>
+    </None>
+    <None Include="ar_SA\pcsx2_Main.po">
+      <Filter>ar_SA</Filter>
+    </None>
+    <None Include="ca_ES\pcsx2_Iconized.po">
+      <Filter>ca_ES</Filter>
+    </None>
+    <None Include="ca_ES\pcsx2_Main.po">
+      <Filter>ca_ES</Filter>
+    </None>
+    <None Include="cs_CZ\pcsx2_Main.po">
+      <Filter>cs_CZ</Filter>
+    </None>
+    <None Include="cs_CZ\pcsx2_Iconized.po">
+      <Filter>cs_CZ</Filter>
+    </None>
+    <None Include="da_DK\pcsx2_Main.po">
+      <Filter>da_DK</Filter>
+    </None>
+    <None Include="da_DK\pcsx2_Iconized.po">
+      <Filter>da_DK</Filter>
+    </None>
+    <None Include="de_DE\pcsx2_Main.po">
+      <Filter>de_DE</Filter>
+    </None>
+    <None Include="de_DE\pcsx2_Iconized.po">
+      <Filter>de_DE</Filter>
+    </None>
+    <None Include="es_ES\pcsx2_Main.po">
+      <Filter>es_ES</Filter>
+    </None>
+    <None Include="es_ES\pcsx2_Iconized.po">
+      <Filter>es_ES</Filter>
+    </None>
+    <None Include="fi_FI\pcsx2_Iconized.po">
+      <Filter>fi_FI</Filter>
+    </None>
+    <None Include="fi_FI\pcsx2_Main.po">
+      <Filter>fi_FI</Filter>
+    </None>
+    <None Include="fr_FR\pcsx2_Main.po">
+      <Filter>fr_FR</Filter>
+    </None>
+    <None Include="fr_FR\pcsx2_Iconized.po">
+      <Filter>fr_FR</Filter>
+    </None>
+    <None Include="hr_HR\pcsx2_Main.po">
+      <Filter>hr_HR</Filter>
+    </None>
+    <None Include="hr_HR\pcsx2_Iconized.po">
+      <Filter>hr_HR</Filter>
+    </None>
+    <None Include="hu_HU\pcsx2_Main.po">
+      <Filter>hu_HU</Filter>
+    </None>
+    <None Include="hu_HU\pcsx2_Iconized.po">
+      <Filter>hu_HU</Filter>
+    </None>
+    <None Include="id_ID\pcsx2_Iconized.po">
+      <Filter>id_ID</Filter>
+    </None>
+    <None Include="id_ID\pcsx2_Main.po">
+      <Filter>id_ID</Filter>
+    </None>
+    <None Include="it_IT\pcsx2_Main.po">
+      <Filter>it_IT</Filter>
+    </None>
+    <None Include="it_IT\pcsx2_Iconized.po">
+      <Filter>it_IT</Filter>
+    </None>
+    <None Include="ja_JP\pcsx2_Main.po">
+      <Filter>ja_JP</Filter>
+    </None>
+    <None Include="ja_JP\pcsx2_Iconized.po">
+      <Filter>ja_JP</Filter>
+    </None>
+    <None Include="ko_KR\pcsx2_Main.po">
+      <Filter>ko_KR</Filter>
+    </None>
+    <None Include="ko_KR\pcsx2_Iconized.po">
+      <Filter>ko_KR</Filter>
+    </None>
+    <None Include="ms_MY\pcsx2_Iconized.po">
+      <Filter>ms_MY</Filter>
+    </None>
+    <None Include="ms_MY\pcsx2_Main.po">
+      <Filter>ms_MY</Filter>
+    </None>
+    <None Include="nb_NO\pcsx2_Main.po">
+      <Filter>nb_NO</Filter>
+    </None>
+    <None Include="nb_NO\pcsx2_Iconized.po">
+      <Filter>nb_NO</Filter>
+    </None>
+    <None Include="pl_PL\pcsx2_Main.po">
+      <Filter>pl_PL</Filter>
+    </None>
+    <None Include="pl_PL\pcsx2_Iconized.po">
+      <Filter>pl_PL</Filter>
+    </None>
+    <None Include="pt_BR\pcsx2_Main.po">
+      <Filter>pt_BR</Filter>
+    </None>
+    <None Include="pt_BR\pcsx2_Iconized.po">
+      <Filter>pt_BR</Filter>
+    </None>
+    <None Include="ru_RU\pcsx2_Main.po">
+      <Filter>ru_RU</Filter>
+    </None>
+    <None Include="ru_RU\pcsx2_Iconized.po">
+      <Filter>ru_RU</Filter>
+    </None>
+    <None Include="sv_SE\pcsx2_Iconized.po">
+      <Filter>sv_SE</Filter>
+    </None>
+    <None Include="sv_SE\pcsx2_Main.po">
+      <Filter>sv_SE</Filter>
+    </None>
+    <None Include="th_TH\pcsx2_Main.po">
+      <Filter>th_TH</Filter>
+    </None>
+    <None Include="th_TH\pcsx2_Iconized.po">
+      <Filter>th_TH</Filter>
+    </None>
+    <None Include="tr_TR\pcsx2_Main.po">
+      <Filter>tr_TR</Filter>
+    </None>
+    <None Include="tr_TR\pcsx2_Iconized.po">
+      <Filter>tr_TR</Filter>
+    </None>
+    <None Include="zh_CN\pcsx2_Iconized.po">
+      <Filter>zh_CN</Filter>
+    </None>
+    <None Include="zh_CN\pcsx2_Main.po">
+      <Filter>zh_CN</Filter>
+    </None>
+    <None Include="zh_TW\pcsx2_Main.po">
+      <Filter>zh_TW</Filter>
+    </None>
+    <None Include="zh_TW\pcsx2_Iconized.po">
+      <Filter>zh_TW</Filter>
+    </None>
+  </ItemGroup>
+</Project>
