@@ -513,7 +513,7 @@ struct Pcsx2Config
 	}
 };
 
-extern const Pcsx2Config EmuConfig;
+extern Pcsx2Config EmuConfig;
 
 Pcsx2Config::GSOptions&			SetGSConfig();
 Pcsx2Config::RecompilerOptions& SetRecompilerConfig();

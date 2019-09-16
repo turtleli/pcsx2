@@ -532,7 +532,7 @@ void ConsoleLogFrame::OnEnableAllLogging(wxCommandEvent& evt)
 	}
 	DevConWriterEnabled = true;
 	// Safe to change - it's read only in the core thread and only affects log output.
-	const_cast<Pcsx2Config&>(EmuConfig).CdvdVerboseReads = g_Conf->EmuOptions.CdvdVerboseReads = true;
+	EmuConfig.CdvdVerboseReads = g_Conf->EmuOptions.CdvdVerboseReads = true;
 
 	OnLoggingChanged();
 	evt.Skip();
@@ -548,7 +548,7 @@ void ConsoleLogFrame::OnDisableAllLogging(wxCommandEvent& evt)
 	}
 	DevConWriterEnabled = false;
 	// Safe to change - it's read only in the core thread and only affects log output.
-	const_cast<Pcsx2Config&>(EmuConfig).CdvdVerboseReads = g_Conf->EmuOptions.CdvdVerboseReads = false;
+	EmuConfig.CdvdVerboseReads = g_Conf->EmuOptions.CdvdVerboseReads = false;
 
 	OnLoggingChanged();
 	evt.Skip();
@@ -564,7 +564,7 @@ void ConsoleLogFrame::OnSetDefaultLogging(wxCommandEvent& evt)
 	}
 	DevConWriterEnabled = false;
 	// Safe to change - it's read only in the core thread and only affects log output.
-	const_cast<Pcsx2Config&>(EmuConfig).CdvdVerboseReads = g_Conf->EmuOptions.CdvdVerboseReads = false;
+	EmuConfig.CdvdVerboseReads = g_Conf->EmuOptions.CdvdVerboseReads = false;
 
 	OnLoggingChanged();
 	evt.Skip();
@@ -820,7 +820,7 @@ void ConsoleLogFrame::OnToggleCDVDInfo( wxCommandEvent& evt )
 		if( wxMenuItem* item = GetMenuBar()->FindItem(evt.GetId()) )
 		{
 			g_Conf->EmuOptions.CdvdVerboseReads = item->IsChecked();
-			const_cast<Pcsx2Config&>(EmuConfig).CdvdVerboseReads = g_Conf->EmuOptions.CdvdVerboseReads;		// read-only in core thread, so it's safe to modify.
+			EmuConfig.CdvdVerboseReads = g_Conf->EmuOptions.CdvdVerboseReads;		// read-only in core thread, so it's safe to modify.
 		}
 	}
 }
