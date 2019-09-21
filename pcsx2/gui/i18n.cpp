@@ -356,14 +356,9 @@ bool i18n_SetLanguage( wxLanguage wxLangId, const wxString& langCode )
 	return true;
 }
 
-// This method sets the lookup path to search l10n files
+// Portable modes (any OS) and the installed mode on Windows require an additional
+// lookup path to find the localisation files.
 void i18n_SetLanguagePath()
 {
-	// default location for windows
-	wxLocale::AddCatalogLookupPathPrefix( wxGetCwd() );
-	// additional location for linux
-#ifdef __unix__
 	wxLocale::AddCatalogLookupPathPrefix( PathDefs::GetLangs().ToString() );
-#endif
-
 }

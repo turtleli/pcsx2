@@ -458,6 +458,7 @@ bool Pcsx2App::OnInit()
     wxInitAllImageHandlers();
 
 	Console.WriteLn("Applying operating system default language...");
+	i18n_SetLanguagePath();
 	{
 		// The PCSX2 log system hasn't been set up yet, so error messages might
 		// pop up that could cause some alarm amongst users. Let's avoid that.
@@ -468,8 +469,6 @@ bool Pcsx2App::OnInit()
 	Console.WriteLn("Command line parsing...");
 	if( !_parent::OnInit() ) return false;
 	Console.WriteLn("Command line parsed!");
-
-	i18n_SetLanguagePath();
 
 	Bind(wxEVT_KEY_DOWN, &Pcsx2App::OnEmuKeyDown, this, pxID_PadHandler_Keydown);
 	Bind(wxEVT_DESTROY, &Pcsx2App::OnDestroyWindow, this);
