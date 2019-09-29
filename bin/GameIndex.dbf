@@ -19735,6 +19735,7 @@ Serial = SLPM-62107
 Name   = Growlanser 3 - The Duel Darkness
 Region = NTSC-J
 Compat = 4
+MemCardFilter=SLPM-62108
 ---------------------------------------------
 Serial = SLPM-62108
 Name   = Growlanser 3 - The Duel Darkness
@@ -22205,12 +22206,13 @@ Region = NTSC-J
 Serial = SLPM-65073
 Name   = Genso Suikoden III
 Region = NTSC-J
-// This looks like a mess because it includes all serials for Suikoden 3, Suikoden 2, Suikogaiden 1, and Suikogaiden 2. A lot of these probably aren't actually required but it's not really hurting anything to have them here.
-MemCardFilter = SLPM-65073/SLPM-65074/SLPM-65305/SLPM-65694/SLPM-86168/SLPM-86389/SLPM-87100/SLPM-86637/SLPM-86883/SLPM-87261/SLPM-86663/SLPM-86953/SLPM-87262
+// Can import data from Suikoden 2, Suikogaiden 1 and Suikogaiden 2
+MemCardFilter = SLPM-65073/SLPM-86168/SLPM-86637/SLPM-86663
 ---------------------------------------------
 Serial = SLPM-65074
 Name   = Genso Suikoden III
 Region = NTSC-J
+// This looks like a mess because it includes all serials for Suikoden 3, Suikoden 2, Suikogaiden 1, and Suikogaiden 2. A lot of these probably aren't actually required but it's not really hurting anything to have them here.
 MemCardFilter = SLPM-65073/SLPM-65074/SLPM-65305/SLPM-65694/SLPM-86168/SLPM-86389/SLPM-87100/SLPM-86637/SLPM-86883/SLPM-87261/SLPM-86663/SLPM-86953/SLPM-87262
 ---------------------------------------------
 Serial = SLPM-65075
@@ -26597,6 +26599,7 @@ Region = NTSC-J
 Serial = SLPM-66286
 Name   = Genso Suikoden V
 Region = NTSC-J
+MemcardFilter = SLPM-66170
 ---------------------------------------------
 Serial = SLPM-66287
 Name   = Sengoku Basara
@@ -30032,6 +30035,7 @@ Serial = SLPS-20105
 Name   = Growlanser II - The Sense of Justice [Deluxe Pack]
 Region = NTSC-J
 Compat = 4
+MemCardFilter=SLPS-20106
 ---------------------------------------------
 Serial = SLPS-20106
 Name   = Growlanser II - The Sense of Justice
@@ -34173,6 +34177,8 @@ Region = NTSC-J
 Serial = SLPS-25836
 Name   = Super Robot Taisen OG - Original Generations Gaiden
 Region = NTSC-J
+// Can import data from Super Robot Wars OG - Original Generations
+MemCardFilter = SLPS-25836/SLPS-25733
 ---------------------------------------------
 Serial = SLPS-25837
 Name   = Naruto Shippuuden - Narutimate Accel 2
