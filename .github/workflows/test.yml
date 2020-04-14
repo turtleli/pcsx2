@@ -1,0 +1,36 @@
+name: BuildBot
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    # Note: Deletes contents in $GITHUB_WORKSPACE, so let's put it first
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Setup msbuild
+      uses: microsoft/setup-msbuild@v1.0.0
+    
+    - name: Build pcsx2
+      continue-on-error: true
+      run: msbuild "buildbot.xml" /m /v:m /fl1 /fl2 /t:AppVeyor
+      env:
+        DXSDK_DIR: ${{ github.workspace }}\DXSDK\
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: Win32-Release
+        path: bin
