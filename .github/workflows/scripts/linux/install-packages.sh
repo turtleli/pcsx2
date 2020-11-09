@@ -6,7 +6,7 @@ set -e
 declare -a BUILD_PACKAGES=(
   "ccache"
   "cmake"
-  "g++-10-multilib"
+  "g++-multilib"
 )
 
 declare -a GCC_PACKAGES=(
@@ -42,7 +42,6 @@ declare -a PCSX2_PACKAGES=(
   "libaio-dev"
   "libasound2-dev"
   "libcairo2-dev"
-  "libegl-dev"
   "libegl1-mesa-dev"
   "libgdk-pixbuf2.0-dev"
   "libgirepository-1.0-1"
@@ -50,14 +49,11 @@ declare -a PCSX2_PACKAGES=(
   "libgl1-mesa-dev"
   "libgl1-mesa-dri"
   "libgl1"
-  "libgles-dev"
-  "libgles-dev"
   "libgles2-mesa-dev"
   "libglib2.0-dev"
   "libglu1-mesa-dev"
   "libglu1-mesa"
   "libglvnd-dev"
-  "libglx-dev"
   "libglx-mesa0"
   "libglx0"
   "libgtk-3-dev"
@@ -69,8 +65,8 @@ declare -a PCSX2_PACKAGES=(
   "libpcap0.8-dev"
   "libsdl2-dev"
   "libsoundtouch-dev"
-  "libwxgtk3.0-gtk3-0v5"
-  "libwxgtk3.0-gtk3-dev"
+  "libwxgtk3.0-0v5"
+  "libwxgtk3.0-dev"
   "libx11-xcb-dev"
   "libxext-dev"
   "libxft-dev"
@@ -106,13 +102,13 @@ else
 fi
 
 echo "Will install the following packages for building - ${BUILD_PACKAGE_STR}"
-sudo apt remove gcc-9 g++-9
+#sudo apt remove gcc-9 g++-9
 sudo apt-get -y install ${BUILD_PACKAGE_STR}
 
-sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 10
-sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 10
-sudo update-alternatives --install /usr/bin/cc cc /usr/bin/gcc 30
-sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++ 30
+#sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 10
+#sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 10
+#sudo update-alternatives --install /usr/bin/cc cc /usr/bin/gcc 30
+#sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++ 30
 
 # Install packages needed by pcsx2
 PCSX2_PACKAGES_STR=""
