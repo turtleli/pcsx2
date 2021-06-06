@@ -125,7 +125,7 @@ private:
 	s32 frameCounter = 0;
 	bool incrementUndo = false;
 	InputRecordingMode state = InputRecording::InputRecordingMode::NotActive;
-	wxString savestate;
+	std::string savestate;
 
 	// Array of usable pads (currently, only 2)
 	struct InputRecordingPad

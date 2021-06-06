@@ -47,12 +47,12 @@ bool ChdFileReader::Open(const wxString& fileName)
 	do
 	{
 		// Console.Error(L"chd_open checking: %s", static_cast<const char*>(chds[chd_depth]));
-		error = chd_open(static_cast<const char*>(chds[chd_depth]), CHD_OPEN_READ, NULL, &child);
+		error = chd_open(chds[chd_depth].ToStdString().c_str(), CHD_OPEN_READ, NULL, &child);
 		if (error == CHDERR_REQUIRES_PARENT)
 		{
-			if (chd_read_header(static_cast<const char*>(chds[chd_depth]), header) != CHDERR_NONE)
+			if (chd_read_header(chds[chd_depth].ToStdString().c_str(), header) != CHDERR_NONE)
 			{
-				Console.Error(L"chd_open chd_read_header error: %s: %s", chd_error_string(error), static_cast<const char*>(chds[chd_depth]));
+				Console.Error(L"chd_open chd_read_header error: %s: %s", chd_error_string(error), chds[chd_depth].ToStdString().c_str());
 				delete header;
 				delete parent_header;
 				return false;
@@ -64,11 +64,11 @@ bool ChdFileReader::Open(const wxString& fileName)
 			if (dir.IsOpened())
 			{
 				wxString parent_fileName;
-				bool cont = dir.GetFirst(&parent_fileName, wxString("*.", wxfilename.GetExt()), wxDIR_FILES | wxDIR_HIDDEN);
+				bool cont = dir.GetFirst(&parent_fileName, "*." +  wxfilename.GetExt(), wxDIR_FILES | wxDIR_HIDDEN);
 				while (cont)
 				{
 					parent_fileName = wxFileName(dir_path, parent_fileName).GetFullPath();
-					if (chd_read_header(static_cast<const char*>(parent_fileName), parent_header) == CHDERR_NONE &&
+					if (chd_read_header(parent_fileName.ToStdString().c_str(), parent_header) == CHDERR_NONE &&
 						memcmp(parent_header->sha1, header->parentsha1, sizeof(parent_header->sha1)) == 0)
 					{
 						found_parent = true;
@@ -80,7 +80,7 @@ bool ChdFileReader::Open(const wxString& fileName)
 			}
 			if (!found_parent)
 			{
-				Console.Error(L"chd_open no parent for: %s", static_cast<const char*>(chds[chd_depth]));
+				Console.Error(L"chd_open no parent for: %s", chds[chd_depth].ToStdString().c_str());
 				break;
 			}
 		}
@@ -102,7 +102,7 @@ bool ChdFileReader::Open(const wxString& fileName)
 		parent = child;
 		child = NULL;
 		// Console.Error(L"chd_open opening chd: %d %s", d, static_cast<const char*>(chds[d]));
-		error = chd_open(static_cast<const char*>(chds[d]), CHD_OPEN_READ, parent, &child);
+		error = chd_open(chds[d].ToStdString().c_str(), CHD_OPEN_READ, parent, &child);
 		if (error != CHDERR_NONE)
 		{
 			Console.Error(L"chd_open return error: %s", chd_error_string(error));
@@ -111,9 +111,9 @@ bool ChdFileReader::Open(const wxString& fileName)
 		}
 	}
 	ChdFile = child;
-	if (chd_read_header(static_cast<const char*>(chds[0]), header) != CHDERR_NONE)
+	if (chd_read_header(chds[0].ToStdString().c_str(), header) != CHDERR_NONE)
 	{
-		Console.Error(L"chd_open chd_read_header error: %s: %s", chd_error_string(error), static_cast<const char*>(chds[0]));
+		Console.Error(L"chd_open chd_read_header error: %s: %s", chd_error_string(error), chds[0].ToStdString().c_str());
 		delete header;
 		return false;
 	}
